@@ -601,13 +601,13 @@ func (x *Dimensions) GetWeight() float64 {
 // Value represents a value of a metadata field.
 type Value struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Types that are valid to be assigned to Value:
+	// Types that are valid to be assigned to Kind:
 	//
 	//	*Value_StringValue
-	//	*Value_IntValue
+	//	*Value_Int64Value
 	//	*Value_DoubleValue
 	//	*Value_BoolValue
-	Value         isValue_Value `protobuf_oneof:"value"`
+	Kind          isValue_Kind `protobuf_oneof:"kind"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -642,26 +642,26 @@ func (*Value) Descriptor() ([]byte, []int) {
 	return file_inventory_v1_inventory_proto_rawDescGZIP(), []int{8}
 }
 
-func (x *Value) GetValue() isValue_Value {
+func (x *Value) GetKind() isValue_Kind {
 	if x != nil {
-		return x.Value
+		return x.Kind
 	}
 	return nil
 }
 
 func (x *Value) GetStringValue() string {
 	if x != nil {
-		if x, ok := x.Value.(*Value_StringValue); ok {
+		if x, ok := x.Kind.(*Value_StringValue); ok {
 			return x.StringValue
 		}
 	}
 	return ""
 }
 
-func (x *Value) GetIntValue() int64 {
+func (x *Value) GetInt64Value() int64 {
 	if x != nil {
-		if x, ok := x.Value.(*Value_IntValue); ok {
-			return x.IntValue
+		if x, ok := x.Kind.(*Value_Int64Value); ok {
+			return x.Int64Value
 		}
 	}
 	return 0
@@ -669,7 +669,7 @@ func (x *Value) GetIntValue() int64 {
 
 func (x *Value) GetDoubleValue() float64 {
 	if x != nil {
-		if x, ok := x.Value.(*Value_DoubleValue); ok {
+		if x, ok := x.Kind.(*Value_DoubleValue); ok {
 			return x.DoubleValue
 		}
 	}
@@ -678,23 +678,23 @@ func (x *Value) GetDoubleValue() float64 {
 
 func (x *Value) GetBoolValue() bool {
 	if x != nil {
-		if x, ok := x.Value.(*Value_BoolValue); ok {
+		if x, ok := x.Kind.(*Value_BoolValue); ok {
 			return x.BoolValue
 		}
 	}
 	return false
 }
 
-type isValue_Value interface {
-	isValue_Value()
+type isValue_Kind interface {
+	isValue_Kind()
 }
 
 type Value_StringValue struct {
 	StringValue string `protobuf:"bytes,1,opt,name=string_value,json=stringValue,proto3,oneof"`
 }
 
-type Value_IntValue struct {
-	IntValue int64 `protobuf:"varint,2,opt,name=int_value,json=intValue,proto3,oneof"`
+type Value_Int64Value struct {
+	Int64Value int64 `protobuf:"varint,2,opt,name=int64_value,json=int64Value,proto3,oneof"`
 }
 
 type Value_DoubleValue struct {
@@ -705,13 +705,13 @@ type Value_BoolValue struct {
 	BoolValue bool `protobuf:"varint,4,opt,name=bool_value,json=boolValue,proto3,oneof"`
 }
 
-func (*Value_StringValue) isValue_Value() {}
+func (*Value_StringValue) isValue_Kind() {}
 
-func (*Value_IntValue) isValue_Value() {}
+func (*Value_Int64Value) isValue_Kind() {}
 
-func (*Value_DoubleValue) isValue_Value() {}
+func (*Value_DoubleValue) isValue_Kind() {}
 
-func (*Value_BoolValue) isValue_Value() {}
+func (*Value_BoolValue) isValue_Kind() {}
 
 var File_inventory_v1_inventory_proto protoreflect.FileDescriptor
 
@@ -764,14 +764,15 @@ const file_inventory_v1_inventory_proto_rawDesc = "" +
 	"\x06length\x18\x01 \x01(\x01R\x06length\x12\x14\n" +
 	"\x05width\x18\x02 \x01(\x01R\x05width\x12\x16\n" +
 	"\x06height\x18\x03 \x01(\x01R\x06height\x12\x16\n" +
-	"\x06weight\x18\x04 \x01(\x01R\x06weight\"\x9a\x01\n" +
+	"\x06weight\x18\x04 \x01(\x01R\x06weight\"\x9d\x01\n" +
 	"\x05Value\x12#\n" +
-	"\fstring_value\x18\x01 \x01(\tH\x00R\vstringValue\x12\x1d\n" +
-	"\tint_value\x18\x02 \x01(\x03H\x00R\bintValue\x12#\n" +
+	"\fstring_value\x18\x01 \x01(\tH\x00R\vstringValue\x12!\n" +
+	"\vint64_value\x18\x02 \x01(\x03H\x00R\n" +
+	"int64Value\x12#\n" +
 	"\fdouble_value\x18\x03 \x01(\x01H\x00R\vdoubleValue\x12\x1f\n" +
 	"\n" +
-	"bool_value\x18\x04 \x01(\bH\x00R\tboolValueB\a\n" +
-	"\x05value*E\n" +
+	"bool_value\x18\x04 \x01(\bH\x00R\tboolValueB\x06\n" +
+	"\x04kind*E\n" +
 	"\bCategory\x12\v\n" +
 	"\aUNKNOWN\x10\x00\x12\n" +
 	"\n" +
@@ -841,7 +842,7 @@ func file_inventory_v1_inventory_proto_init() {
 	}
 	file_inventory_v1_inventory_proto_msgTypes[8].OneofWrappers = []any{
 		(*Value_StringValue)(nil),
-		(*Value_IntValue)(nil),
+		(*Value_Int64Value)(nil),
 		(*Value_DoubleValue)(nil),
 		(*Value_BoolValue)(nil),
 	}
