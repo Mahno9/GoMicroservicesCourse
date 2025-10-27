@@ -25,6 +25,7 @@ vars:
   NODE_MODULES_DIR: "{{.ROOT_DIR}}/node_modules/.bin"
 
   OPEN_API_ORDER_V1_BASE: "{{.ROOT_DIR}}/shared/api/order/v1/order.openapi.yaml"
+  OPEN_API_ORDER_V1_TARGET: "{{.ROOT_DIR}}/shared/pkg/openapi/order/v1"
   OPEN_API_ORDER_V1_BUNDLE: "{{.ROOT_DIR}}/shared/api/bundles/order.openapi.v1.bundle.yaml"
 
   OPEN_API_FILES: "{{.ROOT_DIR}}/shared/api/bundles"
@@ -185,7 +186,7 @@ tasks:
     cmds:
       - |
         echo "🧞 Generating from: {{.OPEN_API_ORDER_V1_BASE}}"  
-        {{.OGEN}} {{.OPEN_API_ORDER_V1_BASE}} || exit 1
+        {{.OGEN}} --target {{.OPEN_API_ORDER_V1_TARGET}} {{.OPEN_API_ORDER_V1_BASE}} || exit 1
 
   gen:
     desc: "Генерация всех proto и OpenAPI деклараций"

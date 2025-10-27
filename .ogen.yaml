@@ -1,2 +1,2 @@
 parser:
-  allow_remote: true 
+  allow_remote: true # поддержка $ref <local_file.yaml>
