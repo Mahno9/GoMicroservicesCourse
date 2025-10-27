@@ -9,15 +9,6 @@ service PaymentService {
 	rpc PayOrder(PayOrderRequest) returns (PayOrderResponse) {}
 }
 
-// PaymentMethod defines the available payment methods for an order.
-enum PaymentMethod {
-	PAYMENT_METHOD_UNSPECIFIED = 0;
-	PAYMENT_METHOD_CARD = 1;
-	PAYMENT_METHOD_SBP = 2;
-	PAYMENT_METHOD_CREDIT_CARD = 3;
-	PAYMENT_METHOD_INVESTOR_MONEY = 4;
-}
-
 // PayOrderRequest represents a request to pay an order.
 message PayOrderRequest {
 	string order_uuid = 1;
@@ -28,4 +19,13 @@ message PayOrderRequest {
 // PayOrderResponse represents a response to a pay order request.
 message PayOrderResponse {
 	string transaction_uuid = 1;
+}
+
+// PaymentMethod defines the available payment methods for an order.
+enum PaymentMethod {
+	UNKNOWN = 0;
+	CARD = 1;
+	SBP = 2;
+	CREDIT_CARD = 3;
+	INVESTOR_MONEY = 4;
 }
