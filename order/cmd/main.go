@@ -11,14 +11,14 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+
 	orderV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/openapi/order/v1"
 	inventoryV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/proto/inventory/v1"
 	paymentV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/proto/payment/v1"
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
-
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
 const (
@@ -102,7 +102,7 @@ func main() {
 
 	err = httpServer.Shutdown(ctx)
 	if err != nil {
-		log.Fatalf("❗ Ошибка при остановке HTTP-сервера: %v\n", err)
+		log.Printf("❗ Ошибка при остановке HTTP-сервера: %v\n", err)
 	}
 
 	log.Println("✅ gRPC server gracefully stopped")

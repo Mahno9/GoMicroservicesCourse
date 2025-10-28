@@ -28,7 +28,14 @@ type paymentService struct {
 func (ps paymentService) PayOrder(c context.Context, req *paymentV1.PayOrderRequest) (*paymentV1.PayOrderResponse, error) {
 	// TODO: Validate?
 
-	time.Sleep(2 * time.Second)
+	timer := time.NewTimer(2 * time.Second)
+	defer timer.Stop()
+
+	select {
+	case <-timer.C:
+	case <-c.Done():
+		return nil, c.Err()
+	}
 
 	paymentUuid := uuid.New().String()
 	log.Println("🆗 Оплата прошла успешно,", paymentUuid)

@@ -6,10 +6,11 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/google/uuid"
+
 	orderV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/openapi/order/v1"
 	inventoryV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/proto/inventory/v1"
 	paymentV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/proto/payment/v1"
-	"github.com/google/uuid"
 )
 
 type OrderHandler struct {
@@ -33,10 +34,10 @@ func (h *OrderHandler) CreateOrder(ctx context.Context, req *orderV1.CreateOrder
 
 	if len(response.Parts) != len(req.PartUuids) {
 		log.Printf("❗ Some of requested parts are absent")
-		return nil, errors.New("No required parts are available")
+		return nil, errors.New("no required parts are available")
 	}
 
-	var totalPrice float64 = 0.0
+	totalPrice := float64(0.0)
 	for _, part := range response.Parts {
 		totalPrice += part.GetPrice()
 	}
@@ -133,7 +134,7 @@ func (h *OrderHandler) PayOrder(ctx context.Context, req *orderV1.PayOrderReq, p
 func convertPaymentMethod(orderPaymentMethod *orderV1.PaymentMethod) paymentV1.PaymentMethod {
 	paymentMethodBytes, err := orderPaymentMethod.MarshalText()
 	if err != nil {
-		log.Printf("❗ Unknown payment method: %s\n", orderPaymentMethod)
+		log.Printf("❗ Unknown payment method: %v\n", orderPaymentMethod)
 		paymentMethodBytes = []byte(paymentV1.PaymentMethod_UNKNOWN.String())
 	}
 

@@ -6,13 +6,12 @@ import (
 	"net"
 	"os"
 	"os/signal"
-
 	"syscall"
 
-	inventoryV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/proto/inventory/v1"
 	"google.golang.org/grpc"
-
 	"google.golang.org/grpc/reflection"
+
+	inventoryV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/proto/inventory/v1"
 )
 
 const (

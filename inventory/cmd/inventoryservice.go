@@ -2,10 +2,12 @@ package main
 
 import (
 	"context"
-	inventoryV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/proto/inventory/v1"
+	"sync"
+
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"sync"
+
+	inventoryV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/proto/inventory/v1"
 )
 
 type inventoryService struct {

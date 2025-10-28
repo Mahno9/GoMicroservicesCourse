@@ -3,10 +3,11 @@ package main
 import (
 	"math"
 
-	inventoryV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/proto/inventory/v1"
 	gofakeit "github.com/brianvoe/gofakeit/v7"
 	"github.com/google/uuid"
 	"google.golang.org/protobuf/types/known/timestamppb"
+
+	inventoryV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/proto/inventory/v1"
 )
 
 func (service *inventoryService) initParts() {
