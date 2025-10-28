@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	grpcPort = 50051
+	grpcPort = 50052
 )
 
 type paymentService struct {
@@ -28,7 +28,7 @@ type paymentService struct {
 func (ps paymentService) PayOrder(c context.Context, req *paymentV1.PayOrderRequest) (*paymentV1.PayOrderResponse, error) {
 	// TODO: Validate?
 
-	timer := time.NewTimer(2 * time.Second)
+	timer := time.NewTimer(1 * time.Second)
 	defer timer.Stop()
 
 	select {
