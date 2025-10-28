@@ -32,6 +32,12 @@ post:
                 $ref: ../components/properties/order_uuid.yaml
               total_price:
                 $ref: ../components/properties/total_price.yaml
+    '404':
+      description: Детали не найдены
+      content:
+        application/json:
+          schema:
+            $ref: ../components/errors/not_found_error.yaml
     default:
       description: Unexpected error
       content:

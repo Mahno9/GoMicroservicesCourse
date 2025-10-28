@@ -13,7 +13,7 @@ tags:
 
 paths:
   /api/v1/orders:
-    $ref: ./paths/orders.yaml
+    $ref: ./paths/order_create.yaml
   /api/v1/orders/{order_uuid}/pay:
     $ref: ./paths/order_pay.yaml
   /api/v1/orders/{order_uuid}:

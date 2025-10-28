@@ -12,50 +12,59 @@ import (
 	"time"
 
 	orderV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/openapi/order/v1"
+	inventoryV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/proto/inventory/v1"
+	paymentV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/proto/payment/v1"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 const (
+	inventoryAddress  = "localhost:50052"
+	paymentAddress    = "localhost:50051"
 	httpPort          = "8082"
 	readHeaderTimeout = 5 * time.Second
 	shutdownTimeout   = 10 * time.Second
 )
 
-type OrdersStorage struct {
-}
-
-type OrderHandler struct{}
-
-func (h *OrderHandler) CreateOrder(ctx context.Context, req *orderV1.CreateOrderReq) (*orderV1.CreateOrderCreated, error) {
-	return nil, nil // TODO:
-}
-
-func (h *OrderHandler) GetOrder(ctx context.Context, params orderV1.GetOrderParams) (orderV1.GetOrderRes, error) {
-	return nil, nil // TODO:
-}
-
-func (h *OrderHandler) OrderCancel(ctx context.Context, params orderV1.OrderCancelParams) (orderV1.OrderCancelRes, error) {
-	return nil, nil // TODO:
-}
-
-func (h *OrderHandler) PayOrder(ctx context.Context, req *orderV1.PayOrderReq, params orderV1.PayOrderParams) (*orderV1.PayOrderOK, error) {
-	return nil, nil // TODO:
-}
-
-func (h *OrderHandler) NewError(_ context.Context, err error) *orderV1.GenericErrorStatusCode {
-	return &orderV1.GenericErrorStatusCode{
-		StatusCode: http.StatusInternalServerError,
-		Response: orderV1.GenericError{
-			Code:    orderV1.NewOptInt(http.StatusInternalServerError),
-			Message: orderV1.NewOptString(err.Error()),
-		},
-	}
-}
-
 func main() {
-	// TODO: create store
-	orderHandler := &OrderHandler{}
+	inventoryConn, err := grpc.NewClient(
+		inventoryAddress,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		log.Printf("❗ Failed to connect to inventory service (%s): %v\n", inventoryAddress, err)
+		return
+	}
+	defer func() {
+		if err := inventoryConn.Close(); err != nil {
+			log.Printf("❗ Failed to close inventory connection: %v\n", err)
+		}
+	}()
+	inventory := inventoryV1.NewInventoryServiceClient(inventoryConn)
+
+	paymentConn, err := grpc.NewClient(
+		paymentAddress,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		log.Printf("❗ Failed to connect to payment service (%s): %v\n", paymentAddress, err)
+		return
+	}
+	defer func() {
+		if err := paymentConn.Close(); err != nil {
+			log.Printf("❗ Failed to close payment connection: %v\n", err)
+		}
+	}()
+	payment := paymentV1.NewPaymentServiceClient(paymentConn)
+
+	orderHandler := &OrderHandler{
+		store:     &OrdersStorage{},
+		inventory: &inventory,
+		payment:   &payment,
+	}
 
 	orderServer, err := orderV1.NewServer(orderHandler)
 	if err != nil {

@@ -29,6 +29,8 @@ post:
             properties:
               transaction_uuid:
                 $ref: ../components/properties/transaction_uuid.yaml
+    '409':
+      description: Заказ уже оплачен
     default:
       description: Unexpected error
       content:

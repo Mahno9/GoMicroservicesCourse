@@ -186,7 +186,7 @@ tasks:
     cmds:
       - |
         echo "🧞 Generating from: {{.OPEN_API_ORDER_V1_BASE}}"  
-        {{.OGEN}} --target {{.OPEN_API_ORDER_V1_TARGET}} {{.OPEN_API_ORDER_V1_BASE}} || exit 1
+        {{.OGEN}} -clean -package order_v1 --target {{.OPEN_API_ORDER_V1_TARGET}} {{.OPEN_API_ORDER_V1_BASE}} || exit 1
 
   gen:
     desc: "Генерация всех proto и OpenAPI деклараций"
