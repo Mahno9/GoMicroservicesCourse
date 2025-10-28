@@ -113,7 +113,7 @@ tasks:
       Зависимости:
         - install-golangci-lint: автоматически устанавливает линтер
         - format: форматирует код перед проверкой
-    deps: [install-golangci-lint]
+    deps: [install-golangci-lint, ogen:gen]
     vars:
       MODULES: "{{.MODULES}}"
       GOLANGCI_LINT: "{{.GOLANGCI_LINT}}"
