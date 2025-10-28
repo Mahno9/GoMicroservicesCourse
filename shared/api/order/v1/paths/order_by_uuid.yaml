@@ -1,0 +1,50 @@
+parameters:
+  - $ref: ../params/order_uuid.yaml
+
+get:
+  summary: Получить заказ по UUID
+  operationId: GetOrder
+  tags:
+    - Order
+  responses:
+    '200':
+      description: Заказ найден
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - order_uuid
+              - user_uuid
+              - part_uuids
+              - total_price
+              - transaction_uuid
+              - payment_method
+              - status
+            properties:
+              order_uuid:
+                $ref: ../components/properties/order_uuid.yaml
+              user_uuid:
+                $ref: ../components/properties/user_uuid.yaml
+              part_uuids:
+                $ref: ../components/properties/part_uuids.yaml
+              total_price:
+                $ref: ../components/properties/total_price.yaml
+              transaction_uuid:
+                $ref: ../components/properties/transaction_uuid.yaml
+              payment_method:
+                $ref: ../components/properties/payment_method.yaml
+              status:
+                $ref: ../components/properties/status.yaml
+    '404':
+      description: Заказ не найден
+      content:
+        application/json:
+          schema:
+            $ref: ../components/errors/not_found_error.yaml
+    default:
+      description: Unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: ../components/errors/generic_error.yaml

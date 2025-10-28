@@ -31,6 +31,14 @@ func (h *OrderHandler) CreateOrder(ctx context.Context, req *orderV1.CreateOrder
 	return nil, nil // TODO:
 }
 
+func (h *OrderHandler) GetOrder(ctx context.Context, params orderV1.GetOrderParams) (orderV1.GetOrderRes, error) {
+	return nil, nil // TODO:
+}
+
+func (h *OrderHandler) OrderCancel(ctx context.Context, params orderV1.OrderCancelParams) (orderV1.OrderCancelRes, error) {
+	return nil, nil // TODO:
+}
+
 func (h *OrderHandler) PayOrder(ctx context.Context, req *orderV1.PayOrderReq, params orderV1.PayOrderParams) (*orderV1.PayOrderOK, error) {
 	return nil, nil // TODO:
 }

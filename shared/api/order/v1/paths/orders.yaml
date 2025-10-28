@@ -1,5 +1,5 @@
 post:
-  summary: Create a new order for starship parts
+  summary: Создать новый заказ для деталей корабля
   operationId: CreateOrder
   tags:
     - Order
