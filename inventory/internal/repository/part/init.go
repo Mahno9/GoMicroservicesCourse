@@ -1,24 +1,29 @@
-package main
+package part
 
 import (
 	"math"
+	"time"
 
-	gofakeit "github.com/brianvoe/gofakeit/v7"
+	repoModel "github.com/Mahno9/GoMicroservicesCourse/inventory/internal/repository/model"
+	"github.com/brianvoe/gofakeit/v7"
 	"github.com/google/uuid"
-	"google.golang.org/protobuf/types/known/timestamppb"
-
-	inventoryV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/proto/inventory/v1"
+	"github.com/samber/lo"
 )
 
-func (service *inventoryService) initParts() {
+func (r *repository) InitWithDummy() error {
 	parts := generateParts()
 
+	r.mut.Lock()
+	defer r.mut.Unlock()
+
 	for _, part := range parts {
-		service.parts[part.Uuid] = part
+		r.parts[part.Uuid] = part
 	}
+
+	return nil
 }
 
-func generateParts() []*inventoryV1.Part {
+func generateParts() []*repoModel.Part {
 	names := []string{
 		"Main Engine",
 		"Reserve Engine",
@@ -45,29 +50,36 @@ func generateParts() []*inventoryV1.Part {
 		"Stabilization fin",
 	}
 
-	var parts []*inventoryV1.Part
+	categories := []repoModel.Category{
+		repoModel.CategoryEngine,
+		repoModel.CategoryFuel,
+		repoModel.CategoryPorthole,
+		repoModel.CategoryWing,
+	}
+
+	var parts []*repoModel.Part
 	for i := 0; i < gofakeit.Number(20, 50); i++ {
 		idx := gofakeit.Number(0, len(names)-1)
-		parts = append(parts, &inventoryV1.Part{
+		parts = append(parts, &repoModel.Part{
 			Uuid:          uuid.NewString(),
 			Name:          names[idx],
 			Description:   descriptions[idx],
 			Price:         roundTo(gofakeit.Float64Range(100, 10_000)),
 			StockQuantity: int64(gofakeit.Number(1, 100)),
-			Category:      inventoryV1.Category(gofakeit.Number(1, 4)), //nolint:gosec // safe: gofakeit.Number returns 1..4
+			Category:      categories[gofakeit.Number(0, len(categories)-1)],
 			Dimensions:    generateDimensions(),
 			Manufacturer:  generateManufacturer(),
 			Tags:          generateTags(),
 			Metadata:      generateMetadata(),
-			CreatedAt:     timestamppb.Now(),
+			CreatedAt:     lo.ToPtr(time.Now()),
 		})
 	}
 
 	return parts
 }
 
-func generateDimensions() *inventoryV1.Dimensions {
-	return &inventoryV1.Dimensions{
+func generateDimensions() *repoModel.Dimensions {
+	return &repoModel.Dimensions{
 		Length: roundTo(gofakeit.Float64Range(1, 1000)),
 		Width:  roundTo(gofakeit.Float64Range(1, 1000)),
 		Height: roundTo(gofakeit.Float64Range(1, 1000)),
@@ -75,8 +87,8 @@ func generateDimensions() *inventoryV1.Dimensions {
 	}
 }
 
-func generateManufacturer() *inventoryV1.Manufacturer {
-	return &inventoryV1.Manufacturer{
+func generateManufacturer() *repoModel.Manufacturer {
+	return &repoModel.Manufacturer{
 		Name:    gofakeit.Name(),
 		Country: gofakeit.Country(),
 		Website: gofakeit.URL(),
@@ -92,45 +104,30 @@ func generateTags() []string {
 	return tags
 }
 
-func generateMetadata() map[string]*inventoryV1.Value {
-	metadata := make(map[string]*inventoryV1.Value)
+func generateMetadata() map[string]*any {
+	metadata := make(map[string]*any)
 
 	for i := 0; i < gofakeit.Number(1, 10); i++ {
-		metadata[gofakeit.Word()] = generateMetadataValue()
+		value := generateMetadataValue()
+		metadata[gofakeit.Word()] = &value
 	}
 
 	return metadata
 }
 
-func generateMetadataValue() *inventoryV1.Value {
+func generateMetadataValue() any {
 	switch gofakeit.Number(0, 3) {
 	case 0:
-		return &inventoryV1.Value{
-			Kind: &inventoryV1.Value_StringValue{
-				StringValue: gofakeit.Word(),
-			},
-		}
+		return gofakeit.Word()
 
 	case 1:
-		return &inventoryV1.Value{
-			Kind: &inventoryV1.Value_Int64Value{
-				Int64Value: int64(gofakeit.Number(1, 100)),
-			},
-		}
+		return int64(gofakeit.Number(1, 100))
 
 	case 2:
-		return &inventoryV1.Value{
-			Kind: &inventoryV1.Value_DoubleValue{
-				DoubleValue: roundTo(gofakeit.Float64Range(1, 100)),
-			},
-		}
+		return roundTo(gofakeit.Float64Range(1, 100))
 
 	case 3:
-		return &inventoryV1.Value{
-			Kind: &inventoryV1.Value_BoolValue{
-				BoolValue: gofakeit.Bool(),
-			},
-		}
+		return gofakeit.Bool()
 
 	default:
 		return nil

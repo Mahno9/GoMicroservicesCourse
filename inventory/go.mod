@@ -6,6 +6,7 @@ require google.golang.org/grpc v1.76.0
 
 require (
 	github.com/brianvoe/gofakeit/v7 v7.8.1 // indirect
+	github.com/samber/lo v1.52.0 // indirect
 	golang.org/x/net v0.42.0 // indirect
 	golang.org/x/sys v0.34.0 // indirect
 	golang.org/x/text v0.27.0 // indirect
