@@ -1,0 +1,27 @@
+package payment
+
+import (
+	"context"
+	"log"
+	"time"
+
+	"github.com/google/uuid"
+)
+
+func (s *service) Pay(c context.Context, userUuid string, orderUuid string, paymentMethod string) (string, error) {
+	// TODO: Validate?
+
+	timer := time.NewTimer(1 * time.Second)
+	defer timer.Stop()
+
+	select {
+	case <-timer.C:
+	case <-c.Done():
+		return "", c.Err()
+	}
+
+	paymentUuid := uuid.New().String()
+	log.Printf("🆗 Оплата прошла успешно:\nuser uuid: %s, order uuid: %s, newly created payment uuid: %s\n", userUuid, orderUuid, paymentUuid)
+
+	return paymentUuid, nil
+}
