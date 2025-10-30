@@ -61,9 +61,9 @@ func main() {
 	payment := paymentV1.NewPaymentServiceClient(paymentConn)
 
 	orderHandler := &OrderHandler{
-		store:     &OrdersStorage{},
-		inventory: &inventory,
-		payment:   &payment,
+		store:     &OrdersStorage{map[string]OrderInfo{}},
+		inventory: inventory,
+		payment:   payment,
 	}
 
 	orderServer, err := orderV1.NewServer(orderHandler)
@@ -88,7 +88,7 @@ func main() {
 		log.Printf("👂 HTTP-сервер запущен на порту %s\n", httpPort)
 		err := httpServer.ListenAndServe()
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.Fatalf("❗ Ошибка при запуске HTTP-сервера: %v\n", err)
+			log.Printf("❗ Ошибка при запуске HTTP-сервера: %v\n", err)
 		}
 	}()
 

@@ -24,12 +24,12 @@ const (
 func main() {
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", grpcPort))
 	if err != nil {
-		log.Fatalf("❗ failed to listen: %v\n", err)
+		log.Printf("❗ failed to listen: %v\n", err)
 		return
 	}
 	defer func() {
 		if err := listener.Close(); err != nil {
-			log.Fatalf("❗ failed to close listener: %v\n", err)
+			log.Printf("❗ failed to close listener: %v\n", err)
 		}
 	}()
 
@@ -47,7 +47,7 @@ func main() {
 		log.Printf("👂 gRPC server listening on port %d\n", grpcPort)
 		err = grpcServer.Serve(listener)
 		if err != nil {
-			log.Fatalf("❗ failed to serve: %v\n", err)
+			log.Printf("❗ failed to serve: %v\n", err)
 			return
 		}
 	}()

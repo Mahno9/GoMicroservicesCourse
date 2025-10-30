@@ -16,5 +16,5 @@ type OrderInfo struct {
 }
 
 type OrdersStorage struct {
-	orders []OrderInfo
+	orders map[string]OrderInfo
 }

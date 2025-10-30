@@ -28,5 +28,3 @@
 node_modules
 /shared/api/bundles/
 /coverage/
-
-/shared/pkg/**
