@@ -53,7 +53,7 @@ func (service *inventoryService) ListParts(_ context.Context, req *inventoryV1.L
 			continue
 		}
 		if len(filters.Tags) > 0 {
-			for tag, _ := range filters.Tags {
+			for tag := range filters.Tags {
 				if sliceContains(part.Tags, tag) {
 					filteredParts = append(filteredParts, part)
 					continue
@@ -108,7 +108,7 @@ func covnertToFilterSets(filter *inventoryV1.PartsFilter) *filterSets {
 }
 
 func mapContains[T comparable](set map[T]any, val T) bool {
-	for item, _ := range set {
+	for item := range set {
 		if item == val {
 			return true
 		}
