@@ -206,20 +206,52 @@ func APIPartToModelFilter(apiFilter *inventoryV1.PartsFilter) *model.PartsFilter
 		return &model.PartsFilter{}
 	}
 
-	filter := model.PartsFilter{
-		Uuids:                 apiFilter.GetUuids(),
-		Names:                 apiFilter.GetNames(),
-		ManufacturerCountries: apiFilter.GetManufacturerCountries(),
-		Tags:                  apiFilter.GetTags(),
+	filter := model.PartsFilter{}
+
+	// Конвертация uuids из slice в map
+	apiUuids := apiFilter.GetUuids()
+	if len(apiUuids) > 0 {
+		filter.Uuids = make(map[string]any, len(apiUuids))
+		for _, uuid := range apiUuids {
+			filter.Uuids[uuid] = true
+		}
 	}
 
-	// Конвертация категорий
-	apiCategories := apiFilter.GetCategories()
-	modelCategories := make([]model.Category, len(apiCategories))
-	for i, apiCategory := range apiCategories {
-		modelCategories[i] = apiCategoryToModelCategory(apiCategory)
+	// Конвертация names из slice в map
+	apiNames := apiFilter.GetNames()
+	if len(apiNames) > 0 {
+		filter.Names = make(map[string]any, len(apiNames))
+		for _, name := range apiNames {
+			filter.Names[name] = true
+		}
 	}
-	filter.Categories = modelCategories
+
+	// Конвертация categories из slice в map
+	apiCategories := apiFilter.GetCategories()
+	if len(apiCategories) > 0 {
+		filter.Categories = make(map[model.Category]any, len(apiCategories))
+		for _, apiCategory := range apiCategories {
+			filter.Categories[apiCategoryToModelCategory(apiCategory)] = true
+		}
+	}
+
+	// Конвертация manufacturerCountries из slice в map
+	apiCountries := apiFilter.GetManufacturerCountries()
+	if len(apiCountries) > 0 {
+		filter.ManufacturerCountries = make(map[string]any, len(apiCountries))
+		for _, country := range apiCountries {
+			filter.ManufacturerCountries[country] = true
+		}
+	}
+
+	// Конвертация tags из slice в map
+	apiTags := apiFilter.GetTags()
+	if len(apiTags) > 0 {
+		filter.Tags = make(map[string]any, len(apiTags))
+		for _, tag := range apiTags {
+			filter.Tags[tag] = true
+		}
+	}
 
 	return &filter
 }

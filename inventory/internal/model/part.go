@@ -41,9 +41,9 @@ type Part struct {
 }
 
 type PartsFilter struct {
-	Uuids                 []string
-	Names                 []string
-	Categories            []Category
-	ManufacturerCountries []string
-	Tags                  []string
+	Uuids                 map[string]any
+	Names                 map[string]any
+	Categories            map[Category]any
+	ManufacturerCountries map[string]any
+	Tags                  map[string]any
 }

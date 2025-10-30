@@ -93,18 +93,45 @@ func DomainToRepoFilter(domainFilter *domainModel.PartsFilter) *repoModel.PartsF
 		return nil
 	}
 
-	repoFilter := &repoModel.PartsFilter{
-		Uuids:                 domainFilter.Uuids,
-		Names:                 domainFilter.Names,
-		ManufacturerCountries: domainFilter.ManufacturerCountries,
-		Tags:                  domainFilter.Tags,
+	repoFilter := &repoModel.PartsFilter{}
+
+	// Конвертация uuids из map в slice
+	if len(domainFilter.Uuids) > 0 {
+		repoFilter.Uuids = make([]string, 0, len(domainFilter.Uuids))
+		for uuid := range domainFilter.Uuids {
+			repoFilter.Uuids = append(repoFilter.Uuids, uuid)
+		}
 	}
 
-	// Конвертация категорий
+	// Конвертация names из map в slice
+	if len(domainFilter.Names) > 0 {
+		repoFilter.Names = make([]string, 0, len(domainFilter.Names))
+		for name := range domainFilter.Names {
+			repoFilter.Names = append(repoFilter.Names, name)
+		}
+	}
+
+	// Конвертация categories из map в slice
 	if len(domainFilter.Categories) > 0 {
-		repoFilter.Categories = make([]repoModel.Category, len(domainFilter.Categories))
-		for i, category := range domainFilter.Categories {
-			repoFilter.Categories[i] = repoModel.Category(category)
+		repoFilter.Categories = make([]repoModel.Category, 0, len(domainFilter.Categories))
+		for category := range domainFilter.Categories {
+			repoFilter.Categories = append(repoFilter.Categories, repoModel.Category(category))
+		}
+	}
+
+	// Конвертация manufacturerCountries из map в slice
+	if len(domainFilter.ManufacturerCountries) > 0 {
+		repoFilter.ManufacturerCountries = make([]string, 0, len(domainFilter.ManufacturerCountries))
+		for country := range domainFilter.ManufacturerCountries {
+			repoFilter.ManufacturerCountries = append(repoFilter.ManufacturerCountries, country)
+		}
+	}
+
+	// Конвертация tags из map в slice
+	if len(domainFilter.Tags) > 0 {
+		repoFilter.Tags = make([]string, 0, len(domainFilter.Tags))
+		for tag := range domainFilter.Tags {
+			repoFilter.Tags = append(repoFilter.Tags, tag)
 		}
 	}
 
@@ -117,18 +144,45 @@ func RepoToDomainFilter(repoFilter *repoModel.PartsFilter) *domainModel.PartsFil
 		return nil
 	}
 
-	domainFilter := &domainModel.PartsFilter{
-		Uuids:                 repoFilter.Uuids,
-		Names:                 repoFilter.Names,
-		ManufacturerCountries: repoFilter.ManufacturerCountries,
-		Tags:                  repoFilter.Tags,
+	domainFilter := &domainModel.PartsFilter{}
+
+	// Конвертация uuids из slice в map
+	if len(repoFilter.Uuids) > 0 {
+		domainFilter.Uuids = make(map[string]any, len(repoFilter.Uuids))
+		for _, uuid := range repoFilter.Uuids {
+			domainFilter.Uuids[uuid] = true
+		}
 	}
 
-	// Конвертация категорий
+	// Конвертация names из slice в map
+	if len(repoFilter.Names) > 0 {
+		domainFilter.Names = make(map[string]any, len(repoFilter.Names))
+		for _, name := range repoFilter.Names {
+			domainFilter.Names[name] = true
+		}
+	}
+
+	// Конвертация categories из slice в map
 	if len(repoFilter.Categories) > 0 {
-		domainFilter.Categories = make([]domainModel.Category, len(repoFilter.Categories))
-		for i, category := range repoFilter.Categories {
-			domainFilter.Categories[i] = domainModel.Category(category)
+		domainFilter.Categories = make(map[domainModel.Category]any, len(repoFilter.Categories))
+		for _, category := range repoFilter.Categories {
+			domainFilter.Categories[domainModel.Category(category)] = true
+		}
+	}
+
+	// Конвертация manufacturerCountries из slice в map
+	if len(repoFilter.ManufacturerCountries) > 0 {
+		domainFilter.ManufacturerCountries = make(map[string]any, len(repoFilter.ManufacturerCountries))
+		for _, country := range repoFilter.ManufacturerCountries {
+			domainFilter.ManufacturerCountries[country] = true
+		}
+	}
+
+	// Конвертация tags из slice в map
+	if len(repoFilter.Tags) > 0 {
+		domainFilter.Tags = make(map[string]any, len(repoFilter.Tags))
+		for _, tag := range repoFilter.Tags {
+			domainFilter.Tags[tag] = true
 		}
 	}
 
