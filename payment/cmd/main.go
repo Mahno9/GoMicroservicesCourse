@@ -25,7 +25,7 @@ type paymentService struct {
 	paymentV1.UnimplementedPaymentServiceServer
 }
 
-func (ps paymentService) PayOrder(c context.Context, req *paymentV1.PayOrderRequest) (*paymentV1.PayOrderResponse, error) {
+func (ps *paymentService) PayOrder(c context.Context, req *paymentV1.PayOrderRequest) (*paymentV1.PayOrderResponse, error) {
 	// TODO: Validate?
 
 	timer := time.NewTimer(1 * time.Second)
@@ -48,12 +48,12 @@ func (ps paymentService) PayOrder(c context.Context, req *paymentV1.PayOrderRequ
 func main() {
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", grpcPort))
 	if err != nil {
-		log.Fatalf("❗ failed to listen: %v\n", err)
+		log.Printf("❗ failed to listen: %v\n", err)
 		return
 	}
 	defer func() {
 		if err := listener.Close(); err != nil {
-			log.Fatalf("❗ failed to close listener: %v\n", err)
+			log.Printf("❗ failed to close listener: %v\n", err)
 		}
 	}()
 
@@ -68,7 +68,7 @@ func main() {
 		log.Printf("👂 gRPC server listening on port %d\n", grpcPort)
 		err = grpcServer.Serve(listener)
 		if err != nil {
-			log.Fatalf("❗ failed to serve: %v\n", err)
+			log.Printf("❗ failed to serve: %v\n", err)
 			return
 		}
 	}()

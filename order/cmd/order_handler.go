@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -13,16 +14,23 @@ import (
 	paymentV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/proto/payment/v1"
 )
 
+const (
+	createOrderTimeout = 1 * time.Second
+)
+
 type OrderHandler struct {
 	store     *OrdersStorage
-	inventory *inventoryV1.InventoryServiceClient
-	payment   *paymentV1.PaymentServiceClient
+	inventory inventoryV1.InventoryServiceClient
+	payment   paymentV1.PaymentServiceClient
 }
 
 func (h *OrderHandler) CreateOrder(ctx context.Context, req *orderV1.CreateOrderReq) (orderV1.CreateOrderRes, error) {
 	log.Printf("Creating order with details: %v\n", req)
 
-	response, err := (*h.inventory).ListParts(ctx, &inventoryV1.ListPartsRequest{
+	timedCtx, cancel := context.WithTimeout(ctx, createOrderTimeout)
+	defer cancel()
+
+	response, err := h.inventory.ListParts(timedCtx, &inventoryV1.ListPartsRequest{
 		Filter: &inventoryV1.PartsFilter{
 			Uuids: req.PartUuids,
 		},
@@ -43,15 +51,15 @@ func (h *OrderHandler) CreateOrder(ctx context.Context, req *orderV1.CreateOrder
 	}
 
 	orderUUID := uuid.New().String()
-	h.store.orders = append(h.store.orders, OrderInfo{
+	h.store.orders[orderUUID] = OrderInfo{
 		orderUuid:  orderUUID,
 		userUuid:   string(req.UserUUID),
 		partUuids:  req.PartUuids,
 		totalPrice: totalPrice,
 		status:     orderV1.StatusPENDINGPAYMENT,
-	})
+	}
 
-	log.Printf("❕ New order created:\n%+v\n", h.store.orders[len(h.store.orders)-1])
+	log.Printf("❕ New order created:\n%+v\n", h.store.orders[orderUUID])
 
 	return &orderV1.CreateOrderCreated{
 		OrderUUID:  orderV1.OrderUUID(orderUUID),
@@ -84,51 +92,53 @@ func (h *OrderHandler) GetOrder(ctx context.Context, params orderV1.GetOrderPara
 }
 
 func (h *OrderHandler) OrderCancel(ctx context.Context, params orderV1.OrderCancelParams) (orderV1.OrderCancelRes, error) {
-	for i, order := range h.store.orders {
-		if order.orderUuid == string(params.OrderUUID) {
-			if order.status != orderV1.StatusPENDINGPAYMENT {
-				return &orderV1.OrderCancelConflict{}, nil
-			}
-
-			h.store.orders[i].status = orderV1.StatusCANCELLED
-			return &orderV1.OrderCancelNoContent{}, nil
-		}
+	order, ok := h.store.orders[params.OrderUUID]
+	if ok {
+		return &orderV1.OrderCancelNotFound{}, nil
 	}
 
-	return &orderV1.OrderCancelNotFound{}, nil
+	if order.status != orderV1.StatusPENDINGPAYMENT {
+		return &orderV1.OrderCancelConflict{}, nil
+	}
+
+	order.status = orderV1.StatusCANCELLED
+	h.store.orders[params.OrderUUID] = order
+
+	return &orderV1.OrderCancelNoContent{}, nil
 }
 
 func (h *OrderHandler) PayOrder(ctx context.Context, req *orderV1.PayOrderReq, params orderV1.PayOrderParams) (orderV1.PayOrderRes, error) {
-	for i, order := range h.store.orders {
-		if order.orderUuid == string(params.OrderUUID) {
-			if order.status != orderV1.StatusPENDINGPAYMENT {
-				log.Printf("❗ Invalid order status (%s). Unable to make payment.\n", order.status)
-				return &orderV1.PayOrderConflict{}, nil
-			}
-
-			paymentMethod := convertPaymentMethod(&req.PaymentMethod)
-
-			payResp, err := (*h.payment).PayOrder(ctx, &paymentV1.PayOrderRequest{
-				OrderUuid:     params.OrderUUID,
-				UserUuid:      order.userUuid,
-				PaymentMethod: paymentMethod,
-			})
-			if err != nil {
-				log.Printf("❗ Failed to pay order: %v\n", err)
-				return nil, err
-			}
-
-			h.store.orders[i].paymentMethod = paymentMethod
-			h.store.orders[i].transactionUuid = payResp.TransactionUuid
-			h.store.orders[i].status = orderV1.StatusPAID
-
-			return &orderV1.PayOrderOK{
-				TransactionUUID: orderV1.TransactionUUID(payResp.TransactionUuid),
-			}, nil
-		}
+	order, ok := h.store.orders[params.OrderUUID]
+	if ok {
+		return nil, nil
 	}
 
-	return nil, nil
+	if order.status != orderV1.StatusPENDINGPAYMENT {
+		log.Printf("❗ Invalid order status (%s). Unable to make payment.\n", order.status)
+		return &orderV1.PayOrderConflict{}, nil
+	}
+
+	paymentMethod := convertPaymentMethod(&req.PaymentMethod)
+
+	payResp, err := h.payment.PayOrder(ctx, &paymentV1.PayOrderRequest{
+		OrderUuid:     params.OrderUUID,
+		UserUuid:      order.userUuid,
+		PaymentMethod: paymentMethod,
+	})
+	if err != nil {
+		log.Printf("❗ Failed to pay order: %v\n", err)
+		return nil, err
+	}
+
+	order.paymentMethod = paymentMethod
+	order.transactionUuid = payResp.TransactionUuid
+	order.status = orderV1.StatusPAID
+
+	h.store.orders[order.orderUuid] = order
+
+	return &orderV1.PayOrderOK{
+		TransactionUUID: orderV1.TransactionUUID(payResp.TransactionUuid),
+	}, nil
 }
 
 func convertPaymentMethod(orderPaymentMethod *orderV1.PaymentMethod) paymentV1.PaymentMethod {
