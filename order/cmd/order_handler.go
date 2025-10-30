@@ -93,7 +93,7 @@ func (h *OrderHandler) GetOrder(ctx context.Context, params orderV1.GetOrderPara
 
 func (h *OrderHandler) OrderCancel(ctx context.Context, params orderV1.OrderCancelParams) (orderV1.OrderCancelRes, error) {
 	order, ok := h.store.orders[params.OrderUUID]
-	if ok {
+	if !ok {
 		return &orderV1.OrderCancelNotFound{}, nil
 	}
 
@@ -109,7 +109,7 @@ func (h *OrderHandler) OrderCancel(ctx context.Context, params orderV1.OrderCanc
 
 func (h *OrderHandler) PayOrder(ctx context.Context, req *orderV1.PayOrderReq, params orderV1.PayOrderParams) (orderV1.PayOrderRes, error) {
 	order, ok := h.store.orders[params.OrderUUID]
-	if ok {
+	if !ok {
 		return nil, nil
 	}
 

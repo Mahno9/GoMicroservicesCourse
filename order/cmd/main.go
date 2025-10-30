@@ -61,9 +61,9 @@ func main() {
 	payment := paymentV1.NewPaymentServiceClient(paymentConn)
 
 	orderHandler := &OrderHandler{
-		store:     &OrdersStorage{},
-		inventory: &inventory,
-		payment:   &payment,
+		store:     &OrdersStorage{map[string]OrderInfo{}},
+		inventory: inventory,
+		payment:   payment,
 	}
 
 	orderServer, err := orderV1.NewServer(orderHandler)
