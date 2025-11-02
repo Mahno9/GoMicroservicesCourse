@@ -14,11 +14,13 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 
 	orderV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/openapi/order/v1"
-	inventoryV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/proto/inventory/v1"
-	paymentV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/proto/payment/v1"
+
+	orderApiHandlerV1 "github.com/Mahno9/GoMicroservicesCourse/order/internal/api/order/v1"
+	inventoryV1 "github.com/Mahno9/GoMicroservicesCourse/order/internal/client/grpc/inventory/v1"
+	paymentV1 "github.com/Mahno9/GoMicroservicesCourse/order/internal/client/grpc/payment/v1"
+	orderModel "github.com/Mahno9/GoMicroservicesCourse/order/internal/service/order"
 )
 
 const (
@@ -30,43 +32,30 @@ const (
 )
 
 func main() {
-	inventoryConn, err := grpc.NewClient(
-		inventoryAddress,
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-	)
+	inventory, err := inventoryV1.NewClient(inventoryAddress)
 	if err != nil {
-		log.Printf("❗ Failed to connect to inventory service (%s): %v\n", inventoryAddress, err)
-		return
+		log.Printf("❗ Failed to create inventory client: %v\n", err)
 	}
 	defer func() {
-		if err := inventoryConn.Close(); err != nil {
+		if err := inventory.Close(); err != nil && !errors.Is(err, grpc.ErrServerStopped) {
 			log.Printf("❗ Failed to close inventory connection: %v\n", err)
 		}
 	}()
-	inventory := inventoryV1.NewInventoryServiceClient(inventoryConn)
 
-	paymentConn, err := grpc.NewClient(
-		paymentAddress,
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-	)
+	payment, err := paymentV1.NewClient(paymentAddress)
 	if err != nil {
-		log.Printf("❗ Failed to connect to payment service (%s): %v\n", paymentAddress, err)
-		return
+		log.Printf("❗ Failed to create payment client: %v\n", err)
 	}
 	defer func() {
-		if err := paymentConn.Close(); err != nil {
+		if err := payment.Close(); err != nil && !errors.Is(err, grpc.ErrServerStopped) {
 			log.Printf("❗ Failed to close payment connection: %v\n", err)
 		}
 	}()
-	payment := paymentV1.NewPaymentServiceClient(paymentConn)
 
-	orderHandler := &OrderHandler{
-		store:     &OrdersStorage{map[string]OrderInfo{}},
-		inventory: inventory,
-		payment:   payment,
-	}
+	orderService := orderModel.NewService(inventory, payment)
+	apiHandler := orderApiHandlerV1.NewAPIHandler(orderService)
 
-	orderServer, err := orderV1.NewServer(orderHandler)
+	orderServer, err := orderV1.NewServer(apiHandler)
 	if err != nil {
 		panic(err)
 	}

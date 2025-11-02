@@ -6,44 +6,68 @@ import (
 )
 
 func ApiToModelOrderInfo(apiOrder *orderV1.CreateOrderReq) model.CreateOrderData {
-	newOrderData := model.CreateOrderData{
-		UserUuid: string(apiOrder.UserUUID),
+	if apiOrder == nil {
+		return model.CreateOrderData{}
 	}
 
-	newOrderData.PartUuids = make(map[string]any)
-	for _, partUuid := range apiOrder.PartUuids {
-		newOrderData.PartUuids[string(partUuid)] = nil
-	}
+	partUuids := make([]string, len(apiOrder.PartUuids))
+	copy(partUuids, apiOrder.PartUuids)
 
-	return newOrderData
+	return model.CreateOrderData{
+		UserUuid:  string(apiOrder.UserUUID),
+		PartUuids: partUuids,
+	}
 }
 
-func ConvertPaymentMethod(orderPaymentMethod *orderV1.PaymentMethod) (int32, error) {
-	paymentMethodBytes, err := orderPaymentMethod.MarshalText()
-	if err != nil {
-		return 0, model.UnknownPaymentMethodErr
+func ModelToApiGetOrder(modelOrder *model.Order) *orderV1.GetOrderOK {
+	return &orderV1.GetOrderOK{
+		OrderUUID:       orderV1.OrderUUID(modelOrder.OrderUuid),
+		UserUUID:        orderV1.UserUUID(modelOrder.UserUuid),
+		PartUuids:       modelOrder.PartUuids,
+		TotalPrice:      orderV1.TotalPrice(modelOrder.TotalPrice),
+		TransactionUUID: orderV1.TransactionUUID(modelOrder.TransactionUuid),
+		PaymentMethod:   ModelToApiPaymentMethod(modelOrder.PaymentMethod),
+		Status:          ModelToApiOrderStatus(int32(modelOrder.Status)),
 	}
+}
 
-	// Convert string representation to payment method enum value
-	// This is a simplified conversion - in a real implementation you might need
-	// to map between different enum types more carefully
-	paymentMethodStr := string(paymentMethodBytes)
-	
-	// Default to unknown payment method
-	if paymentMethodStr == "" {
-		return 0, model.UnknownPaymentMethodErr
-	}
-
-	// Simple conversion - in real implementation you'd need proper mapping
-	// between orderV1.PaymentMethod and int32 representation
-	switch orderV1.PaymentMethod(paymentMethodStr) {
-	case orderV1.PaymentMethodCREDIT_CARD:
-		return 1, nil
-	case orderV1.PaymentMethodCASH:
-		return 2, nil
-	case orderV1.PaymentMethodBANK_TRANSFER:
-		return 3, nil
+func ModelToApiOrderStatus(modelStatus int32) orderV1.Status {
+	switch modelStatus {
+	case 2:
+		return orderV1.StatusPAID
+	case 3:
+		return orderV1.StatusCANCELLED
 	default:
-		return 0, model.UnknownPaymentMethodErr
+		return orderV1.StatusPENDINGPAYMENT
+	}
+}
+
+func ModelToApiPaymentMethod(modelPaymentMethod int32) orderV1.PaymentMethod {
+	switch modelPaymentMethod {
+	case 1:
+		return orderV1.PaymentMethodCARD
+	case 2:
+		return orderV1.PaymentMethodSBP
+	case 3:
+		return orderV1.PaymentMethodCREDITCARD
+	case 4:
+		return orderV1.PaymentMethodINVESTORMONEY
+	default:
+		return orderV1.PaymentMethodUNKNOWN
+	}
+}
+
+func ApiToModelPaymentMethod(apiPaymentMethod orderV1.PaymentMethod) int32 {
+	switch apiPaymentMethod {
+	case orderV1.PaymentMethodCARD:
+		return 1
+	case orderV1.PaymentMethodSBP:
+		return 2
+	case orderV1.PaymentMethodCREDITCARD:
+		return 3
+	case orderV1.PaymentMethodINVESTORMONEY:
+		return 4
+	default:
+		return 0
 	}
 }

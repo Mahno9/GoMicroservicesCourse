@@ -22,21 +22,21 @@ type client struct {
 }
 
 // Call Close() for the new client on defer
-func NewService(address string) *client {
+func NewClient(address string) (*client, error) {
 	connection, err := grpc.NewClient(address,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	return &client{
 		connection: connection,
 		service:    paymentV1.NewPaymentServiceClient(connection),
-	}
+	}, nil
 }
 
 // Call on defer
-func (c *client) Close() {
-	c.connection.Close()
+func (c *client) Close() error {
+	return c.connection.Close()
 }

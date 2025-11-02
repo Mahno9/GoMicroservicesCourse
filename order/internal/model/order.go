@@ -18,5 +18,13 @@ type Order struct {
 	TotalPrice      float64
 	TransactionUuid string
 	PaymentMethod   int32
-	Status          int32
+	Status          OrderStatus
 }
+
+type OrderStatus int32
+
+const (
+	StatusPENDINGPAYMENT OrderStatus = 0
+	StatusPAID           OrderStatus = 1
+	StatusCANCELLED      OrderStatus = 2
+)

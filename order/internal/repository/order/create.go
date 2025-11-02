@@ -5,7 +5,12 @@ import (
 	"github.com/Mahno9/GoMicroservicesCourse/order/internal/repository/converter"
 )
 
-func (r *repository) Create(order *model.Order) error {
+func (r *repository) Create(order *model.Order) (*model.Order, error) {
 	r.orders[order.OrderUuid] = converter.ModelToRepositoryOrder(order)
-	return nil
+
+	storedOrder, ok := r.Get(order.OrderUuid)
+	if ok != nil {
+		return nil, model.OrderDoesNotExistErr
+	}
+	return storedOrder, nil
 }

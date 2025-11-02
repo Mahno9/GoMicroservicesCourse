@@ -3,6 +3,7 @@ package converter
 import (
 	"github.com/Mahno9/GoMicroservicesCourse/order/internal/model"
 	inventoryV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/proto/inventory/v1"
+	paymentV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/proto/payment/v1"
 )
 
 func InventoryToModelPart(inventoryPart *inventoryV1.Part) (*model.Part, error) {
@@ -78,4 +79,19 @@ func ModelToInventoryPartsFilter(modelFilter *model.PartsFilter) *inventoryV1.Pa
 	result.Tags = append(result.Tags, modelFilter.Tags...)
 
 	return result
+}
+
+func ModelToPaymentPaymentMethod(paymentMethod int32) paymentV1.PaymentMethod {
+	switch paymentMethod {
+	case 1:
+		return paymentV1.PaymentMethod_CARD
+	case 2:
+		return paymentV1.PaymentMethod_SBP
+	case 3:
+		return paymentV1.PaymentMethod_CREDIT_CARD
+	case 4:
+		return paymentV1.PaymentMethod_INVESTOR_MONEY
+	default:
+		return paymentV1.PaymentMethod_UNKNOWN
+	}
 }

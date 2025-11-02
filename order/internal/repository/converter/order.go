@@ -14,7 +14,7 @@ func ModelToRepositoryOrder(order *model.Order) *repoModel.Order {
 		TotalPrice:      order.TotalPrice,
 		TransactionUuid: order.TransactionUuid,
 		PaymentMethod:   order.PaymentMethod,
-		Status:          order.Status,
+		Status:          int32(order.Status),
 	}
 }
 
@@ -27,6 +27,6 @@ func RepositoryOrderToModel(order *repoModel.Order) *model.Order {
 		TotalPrice:      order.TotalPrice,
 		TransactionUuid: order.TransactionUuid,
 		PaymentMethod:   order.PaymentMethod,
-		Status:          order.Status,
+		Status:          model.OrderStatus(order.Status),
 	}
 }
