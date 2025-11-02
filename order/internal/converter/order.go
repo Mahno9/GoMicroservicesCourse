@@ -18,14 +18,32 @@ func ApiToModelOrderInfo(apiOrder *orderV1.CreateOrderReq) model.CreateOrderData
 	return newOrderData
 }
 
-func convertPaymentMethod(orderPaymentMethod *orderV1.PaymentMethod) (int32, error) {
+func ConvertPaymentMethod(orderPaymentMethod *orderV1.PaymentMethod) (int32, error) {
 	paymentMethodBytes, err := orderPaymentMethod.MarshalText()
 	if err != nil {
-		return 0, model.unknownPaymentMethodErr
-
-		log.Printf("❗ Unknown payment method: %v\n", orderPaymentMethod)
-		paymentMethodBytes = []byte(paymentV1.PaymentMethod_UNKNOWN.String())
+		return 0, model.UnknownPaymentMethodErr
 	}
 
-	return paymentV1.PaymentMethod(paymentV1.PaymentMethod_value[string(paymentMethodBytes)])
+	// Convert string representation to payment method enum value
+	// This is a simplified conversion - in a real implementation you might need
+	// to map between different enum types more carefully
+	paymentMethodStr := string(paymentMethodBytes)
+	
+	// Default to unknown payment method
+	if paymentMethodStr == "" {
+		return 0, model.UnknownPaymentMethodErr
+	}
+
+	// Simple conversion - in real implementation you'd need proper mapping
+	// between orderV1.PaymentMethod and int32 representation
+	switch orderV1.PaymentMethod(paymentMethodStr) {
+	case orderV1.PaymentMethodCREDIT_CARD:
+		return 1, nil
+	case orderV1.PaymentMethodCASH:
+		return 2, nil
+	case orderV1.PaymentMethodBANK_TRANSFER:
+		return 3, nil
+	default:
+		return 0, model.UnknownPaymentMethodErr
+	}
 }

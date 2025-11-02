@@ -1,16 +1,5 @@
 package model
 
-type CreateOrderData struct {
-	UserUuid  string
-	PartUuids []string
-}
-
-type PayOrderData struct {
-	OrderUuid     string
-	UserUuid      string
-	PaymentMethod int32
-}
-
 type Order struct {
 	OrderUuid       string
 	UserUuid        string
