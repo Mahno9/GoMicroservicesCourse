@@ -2,6 +2,7 @@ package order
 
 import (
 	"context"
+
 	"github.com/Mahno9/GoMicroservicesCourse/order/internal/model"
 )
 
@@ -12,7 +13,7 @@ func (s *service) PayOrder(c context.Context, data model.PayOrderData) (string, 
 	}
 
 	if order.Status != model.StatusPENDINGPAYMENT {
-		return "", model.OrderCancelConflictErr
+		return "", model.ErrOrderCancelConflict
 	}
 
 	transactionUuid, err := s.payment.PayOrder(c, model.PayOrderData{

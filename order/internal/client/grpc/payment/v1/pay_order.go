@@ -2,6 +2,7 @@ package v1
 
 import (
 	"context"
+
 	"github.com/Mahno9/GoMicroservicesCourse/order/internal/client/converter"
 	"github.com/Mahno9/GoMicroservicesCourse/order/internal/model"
 	paymentV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/proto/payment/v1"

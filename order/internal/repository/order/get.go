@@ -8,7 +8,7 @@ import (
 func (r *repository) Get(orderUuid string) (*model.Order, error) {
 	repoOrder, exists := r.orders[orderUuid]
 	if !exists {
-		return nil, model.OrderDoesNotExistErr
+		return nil, model.ErrOrderDoesNotExist
 	}
 
 	return converter.RepositoryOrderToModel(repoOrder), nil

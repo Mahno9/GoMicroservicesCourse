@@ -2,7 +2,6 @@ package order
 
 import (
 	def "github.com/Mahno9/GoMicroservicesCourse/order/internal/repository"
-
 	repoModel "github.com/Mahno9/GoMicroservicesCourse/order/internal/repository/model"
 )
 

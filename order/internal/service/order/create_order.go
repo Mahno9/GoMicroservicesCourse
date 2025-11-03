@@ -2,8 +2,10 @@ package order
 
 import (
 	"context"
-	"github.com/Mahno9/GoMicroservicesCourse/order/internal/model"
+
 	"github.com/google/uuid"
+
+	"github.com/Mahno9/GoMicroservicesCourse/order/internal/model"
 )
 
 func (s *service) CreateOrder(c context.Context, data model.CreateOrderData) (*model.Order, error) {
@@ -15,7 +17,7 @@ func (s *service) CreateOrder(c context.Context, data model.CreateOrderData) (*m
 	}
 
 	if len(orderParts) != len(data.PartUuids) {
-		return nil, model.PartsNotAvailableErr
+		return nil, model.ErrPartsNotAvailable
 	}
 
 	totalPrice := float64(0.0)

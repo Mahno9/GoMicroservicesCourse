@@ -5,6 +5,7 @@ import (
 	repoModel "github.com/Mahno9/GoMicroservicesCourse/inventory/internal/repository/model"
 )
 
+// nolint:dupl
 // DomainToRepoPart конвертирует доменную модель в модель репозитория
 func DomainToRepoPart(domainPart *domainModel.Part) *repoModel.Part {
 	if domainPart == nil {
@@ -46,6 +47,7 @@ func DomainToRepoPart(domainPart *domainModel.Part) *repoModel.Part {
 	return repoPart
 }
 
+// nolint:dupl
 // RepoToDomainPart конвертирует модель репозитория в доменную модель
 func RepoToDomainPart(repoPart *repoModel.Part) *domainModel.Part {
 	if repoPart == nil {

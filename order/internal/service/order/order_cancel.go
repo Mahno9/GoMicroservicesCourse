@@ -2,6 +2,7 @@ package order
 
 import (
 	"context"
+
 	"github.com/Mahno9/GoMicroservicesCourse/order/internal/model"
 )
 
@@ -12,7 +13,7 @@ func (s *service) OrderCancel(c context.Context, orderUuid string) error {
 	}
 
 	if order.Status != model.StatusPENDINGPAYMENT {
-		return model.OrderCancelConflictErr
+		return model.ErrOrderCancelConflict
 	}
 
 	order.Status = model.StatusCANCELLED

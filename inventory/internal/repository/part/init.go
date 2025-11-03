@@ -4,10 +4,11 @@ import (
 	"math"
 	"time"
 
-	repoModel "github.com/Mahno9/GoMicroservicesCourse/inventory/internal/repository/model"
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/google/uuid"
 	"github.com/samber/lo"
+
+	repoModel "github.com/Mahno9/GoMicroservicesCourse/inventory/internal/repository/model"
 )
 
 func (r *repository) InitWithDummy() error {

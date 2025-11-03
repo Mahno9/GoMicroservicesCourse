@@ -37,7 +37,12 @@ func main() {
 
 	partRepo := partRepository.NewRepository()
 	service := partService.NewService(partRepo)
-	service.InitWithDummy() // init with dummy data
+	err = service.InitWithDummy() // init with dummy data
+	if err != nil {
+		log.Printf("❗ failed to init with dummy data: %v\n", err)
+		return
+	}
+
 	serviceAPI := partV1API.NewAPI(service)
 	inventoryV1.RegisterInventoryServiceServer(grpcServer, serviceAPI)
 

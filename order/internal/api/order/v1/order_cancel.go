@@ -2,6 +2,7 @@ package v1
 
 import (
 	"context"
+
 	orderV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/openapi/order/v1"
 )
 

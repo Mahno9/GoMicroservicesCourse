@@ -2,6 +2,7 @@ package grpc
 
 import (
 	"context"
+
 	"github.com/Mahno9/GoMicroservicesCourse/order/internal/model"
 )
 

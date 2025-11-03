@@ -1,11 +1,11 @@
 package v1
 
 import (
-	def "github.com/Mahno9/GoMicroservicesCourse/order/internal/client/grpc"
-
-	paymentV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/proto/payment/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+
+	def "github.com/Mahno9/GoMicroservicesCourse/order/internal/client/grpc"
+	paymentV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/proto/payment/v1"
 )
 
 var _ def.PaymentClient = (*client)(nil)

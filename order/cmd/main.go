@@ -15,12 +15,11 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"google.golang.org/grpc"
 
-	orderV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/openapi/order/v1"
-
 	orderApiHandlerV1 "github.com/Mahno9/GoMicroservicesCourse/order/internal/api/order/v1"
 	inventoryV1 "github.com/Mahno9/GoMicroservicesCourse/order/internal/client/grpc/inventory/v1"
 	paymentV1 "github.com/Mahno9/GoMicroservicesCourse/order/internal/client/grpc/payment/v1"
 	orderModel "github.com/Mahno9/GoMicroservicesCourse/order/internal/service/order"
+	orderV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/openapi/order/v1"
 )
 
 const (

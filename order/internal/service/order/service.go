@@ -2,7 +2,6 @@ package order
 
 import (
 	"github.com/Mahno9/GoMicroservicesCourse/order/internal/client/grpc"
-
 	"github.com/Mahno9/GoMicroservicesCourse/order/internal/repository"
 	"github.com/Mahno9/GoMicroservicesCourse/order/internal/repository/order"
 	def "github.com/Mahno9/GoMicroservicesCourse/order/internal/service"

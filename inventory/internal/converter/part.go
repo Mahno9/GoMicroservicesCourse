@@ -3,10 +3,11 @@ package converter
 import (
 	"fmt"
 
-	"github.com/Mahno9/GoMicroservicesCourse/inventory/internal/model"
-	inventoryV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/proto/inventory/v1"
 	"github.com/samber/lo"
 	"google.golang.org/protobuf/types/known/timestamppb"
+
+	"github.com/Mahno9/GoMicroservicesCourse/inventory/internal/model"
+	inventoryV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/proto/inventory/v1"
 )
 
 // APIPartToModelPart конвертирует API-модель (protobuf) в модель данных

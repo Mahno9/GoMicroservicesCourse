@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (s *service) Pay(c context.Context, userUuid string, orderUuid string, paymentMethod string) (string, error) {
+func (s *service) Pay(c context.Context, userUuid, orderUuid, paymentMethod string) (string, error) {
 	// TODO: Validate?
 
 	if dl, ok := c.Deadline(); ok {

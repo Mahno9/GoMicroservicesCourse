@@ -2,9 +2,10 @@ package v1
 
 import (
 	"context"
+	"log"
+
 	"github.com/Mahno9/GoMicroservicesCourse/order/internal/converter"
 	orderV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/openapi/order/v1"
-	"log"
 )
 
 func (h *apiHandler) CreateOrder(ctx context.Context, req *orderV1.CreateOrderReq) (orderV1.CreateOrderRes, error) {

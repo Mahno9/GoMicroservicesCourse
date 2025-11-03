@@ -10,7 +10,7 @@ func (r *repository) Create(order *model.Order) (*model.Order, error) {
 
 	storedOrder, ok := r.Get(order.OrderUuid)
 	if ok != nil {
-		return nil, model.OrderDoesNotExistErr
+		return nil, model.ErrOrderDoesNotExist
 	}
 	return storedOrder, nil
 }

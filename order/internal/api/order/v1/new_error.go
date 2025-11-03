@@ -12,7 +12,7 @@ import (
 func (h *apiHandler) NewError(_ context.Context, err error) *orderV1.GenericErrorStatusCode {
 	// Трансляция ошибок из модели в HTTP ошибки
 	switch {
-	case errors.Is(err, model.UnknownPaymentMethodErr):
+	case errors.Is(err, model.ErrUnknownPaymentMethod):
 		return &orderV1.GenericErrorStatusCode{
 			StatusCode: http.StatusBadRequest,
 			Response: orderV1.GenericError{
@@ -20,7 +20,7 @@ func (h *apiHandler) NewError(_ context.Context, err error) *orderV1.GenericErro
 				Message: orderV1.NewOptString("Unknown payment method"),
 			},
 		}
-	case errors.Is(err, model.PartsNotAvailableErr):
+	case errors.Is(err, model.ErrPartsNotAvailable):
 		return &orderV1.GenericErrorStatusCode{
 			StatusCode: http.StatusBadRequest,
 			Response: orderV1.GenericError{
@@ -28,7 +28,7 @@ func (h *apiHandler) NewError(_ context.Context, err error) *orderV1.GenericErro
 				Message: orderV1.NewOptString("No required parts are available"),
 			},
 		}
-	case errors.Is(err, model.OrderDoesNotExistErr):
+	case errors.Is(err, model.ErrOrderDoesNotExist):
 		return &orderV1.GenericErrorStatusCode{
 			StatusCode: http.StatusNotFound,
 			Response: orderV1.GenericError{
@@ -36,7 +36,7 @@ func (h *apiHandler) NewError(_ context.Context, err error) *orderV1.GenericErro
 				Message: orderV1.NewOptString("Order does not exist"),
 			},
 		}
-	case errors.Is(err, model.OrderCancelConflictErr):
+	case errors.Is(err, model.ErrOrderCancelConflict):
 		return &orderV1.GenericErrorStatusCode{
 			StatusCode: http.StatusConflict,
 			Response: orderV1.GenericError{

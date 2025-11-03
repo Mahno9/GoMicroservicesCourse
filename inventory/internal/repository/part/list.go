@@ -3,9 +3,10 @@ package part
 import (
 	"context"
 
+	"github.com/samber/lo"
+
 	domainModel "github.com/Mahno9/GoMicroservicesCourse/inventory/internal/model"
 	"github.com/Mahno9/GoMicroservicesCourse/inventory/internal/repository/converter"
-	"github.com/samber/lo"
 )
 
 func (r *repository) ListParts(_ context.Context, filters *domainModel.PartsFilter) ([]*domainModel.Part, error) {
