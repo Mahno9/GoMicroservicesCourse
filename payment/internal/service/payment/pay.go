@@ -8,16 +8,18 @@ import (
 	"github.com/google/uuid"
 )
 
-func (s *service) Pay(c context.Context, userUuid, orderUuid, paymentMethod string) (string, error) {
-	// TODO: Validate?
+const (
+	payDelay = 1 * time.Second
+)
 
+func (s *service) Pay(c context.Context, userUuid, orderUuid, paymentMethod string) (string, error) {
 	if dl, ok := c.Deadline(); ok {
 		log.Printf("⌛ Context with deadline: %v\n", time.Until(dl))
 	} else {
 		log.Printf("⌛ Context with no timeout\n")
 	}
 
-	timer := time.NewTimer(1 * time.Second)
+	timer := time.NewTimer(payDelay)
 	defer timer.Stop()
 
 	select {

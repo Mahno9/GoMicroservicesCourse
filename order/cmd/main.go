@@ -18,6 +18,7 @@ import (
 	orderApiHandlerV1 "github.com/Mahno9/GoMicroservicesCourse/order/internal/api/order/v1"
 	inventoryV1 "github.com/Mahno9/GoMicroservicesCourse/order/internal/client/grpc/inventory/v1"
 	paymentV1 "github.com/Mahno9/GoMicroservicesCourse/order/internal/client/grpc/payment/v1"
+	orderRepo "github.com/Mahno9/GoMicroservicesCourse/order/internal/repository/order"
 	orderModel "github.com/Mahno9/GoMicroservicesCourse/order/internal/service/order"
 	orderV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/openapi/order/v1"
 )
@@ -51,7 +52,9 @@ func main() {
 		}
 	}()
 
-	orderService := orderModel.NewService(inventory, payment)
+	repository := orderRepo.NewRepository()
+
+	orderService := orderModel.NewService(inventory, payment, repository)
 	apiHandler := orderApiHandlerV1.NewAPIHandler(orderService)
 
 	orderServer, err := orderV1.NewServer(apiHandler)

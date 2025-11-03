@@ -3,7 +3,6 @@ package order
 import (
 	"github.com/Mahno9/GoMicroservicesCourse/order/internal/client/grpc"
 	"github.com/Mahno9/GoMicroservicesCourse/order/internal/repository"
-	"github.com/Mahno9/GoMicroservicesCourse/order/internal/repository/order"
 	def "github.com/Mahno9/GoMicroservicesCourse/order/internal/service"
 )
 
@@ -15,10 +14,10 @@ type service struct {
 
 var _ def.OrderService = (*service)(nil)
 
-func NewService(inventoryClient grpc.InventoryClient, paymentClient grpc.PaymentClient) *service {
+func NewService(inventoryClient grpc.InventoryClient, paymentClient grpc.PaymentClient, repository repository.OrderRepository) *service {
 	return &service{
 		inventory:  inventoryClient,
 		payment:    paymentClient,
-		ordersRepo: order.NewRepository(),
+		ordersRepo: repository,
 	}
 }
