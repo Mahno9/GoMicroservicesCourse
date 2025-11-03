@@ -32,7 +32,6 @@ func (s *service) CreateOrder(c context.Context, data model.CreateOrderData) (*m
 	})
 	if err != nil {
 		return nil, err
-		// TODO: converter to v1 error response type
 	}
 
 	return createdOrder, nil

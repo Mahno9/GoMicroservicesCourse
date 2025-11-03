@@ -8,10 +8,7 @@ import (
 )
 
 func (c *client) ListParts(ctx context.Context, filter *model.PartsFilter) ([]*model.Part, error) {
-	timedContext, cancel := context.WithTimeout(ctx, connectionTimeout)
-	defer cancel()
-
-	response, err := c.service.ListParts(timedContext, &inventoryV1.ListPartsRequest{
+	response, err := c.service.ListParts(ctx, &inventoryV1.ListPartsRequest{
 		Filter: converter.ModelToInventoryPartsFilter(filter),
 	})
 	if err != nil {

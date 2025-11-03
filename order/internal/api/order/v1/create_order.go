@@ -16,7 +16,6 @@ func (h *apiHandler) CreateOrder(ctx context.Context, req *orderV1.CreateOrderRe
 	res, err := h.orderService.CreateOrder(timedCtx, converter.ApiToModelOrderInfo(req))
 	if err != nil {
 		log.Printf("❗ Failed to create order: %v\nNo order is created.", err)
-		// TODO: Convert to V1 format
 		return nil, err
 	}
 

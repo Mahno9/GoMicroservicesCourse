@@ -8,10 +8,7 @@ import (
 )
 
 func (c *client) PayOrder(ctx context.Context, paymentData model.PayOrderData) (string, error) {
-	timedContext, cancel := context.WithTimeout(ctx, connectionTimeout)
-	defer cancel()
-
-	payOrderResponse, err := c.service.PayOrder(timedContext, &paymentV1.PayOrderRequest{
+	payOrderResponse, err := c.service.PayOrder(ctx, &paymentV1.PayOrderRequest{
 		OrderUuid:     paymentData.OrderUuid,
 		UserUuid:      paymentData.UserUuid,
 		PaymentMethod: converter.ModelToPaymentPaymentMethod(paymentData.PaymentMethod),

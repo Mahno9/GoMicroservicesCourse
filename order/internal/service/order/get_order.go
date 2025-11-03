@@ -10,7 +10,6 @@ func (s *service) GetOrder(c context.Context, orderUuid string) (*model.Order, e
 	order, err := s.ordersRepo.Get(orderUuid)
 	if err != nil {
 		return nil, err
-		// TODO: converter to v1 error response type
 	}
 
 	return order, nil

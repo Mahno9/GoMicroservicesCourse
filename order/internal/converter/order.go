@@ -33,9 +33,9 @@ func ModelToApiGetOrder(modelOrder *model.Order) *orderV1.GetOrderOK {
 
 func ModelToApiOrderStatus(modelStatus int32) orderV1.Status {
 	switch modelStatus {
-	case 2:
+	case 1:
 		return orderV1.StatusPAID
-	case 3:
+	case 2:
 		return orderV1.StatusCANCELLED
 	default:
 		return orderV1.StatusPENDINGPAYMENT

@@ -11,6 +11,12 @@ import (
 func (s *service) Pay(c context.Context, userUuid string, orderUuid string, paymentMethod string) (string, error) {
 	// TODO: Validate?
 
+	if dl, ok := c.Deadline(); ok {
+		log.Printf("⌛ Context with deadline: %v\n", time.Until(dl))
+	} else {
+		log.Printf("⌛ Context with no timeout\n")
+	}
+
 	timer := time.NewTimer(1 * time.Second)
 	defer timer.Stop()
 

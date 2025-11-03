@@ -1,17 +1,11 @@
 package v1
 
 import (
-	"time"
-
 	def "github.com/Mahno9/GoMicroservicesCourse/order/internal/client/grpc"
 
 	inventoryV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/proto/inventory/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-)
-
-const (
-	connectionTimeout = 1 * time.Second
 )
 
 var _ def.InventoryClient = (*client)(nil)

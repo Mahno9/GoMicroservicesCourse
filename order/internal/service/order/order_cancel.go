@@ -9,7 +9,6 @@ func (s *service) OrderCancel(c context.Context, orderUuid string) error {
 	order, err := s.ordersRepo.Get(orderUuid)
 	if err != nil {
 		return err
-		// TODO: converter to v1 error response type
 	}
 
 	if order.Status != model.StatusPENDINGPAYMENT {
