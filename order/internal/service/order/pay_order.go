@@ -6,8 +6,8 @@ import (
 	"github.com/Mahno9/GoMicroservicesCourse/order/internal/model"
 )
 
-func (s *service) PayOrder(c context.Context, data model.PayOrderData) (string, error) {
-	order, err := s.ordersRepo.Get(data.OrderUuid)
+func (s *service) PayOrder(c context.Context, orderData model.PayOrderData) (string, error) {
+	order, err := s.ordersRepo.Get(orderData.OrderUuid)
 	if err != nil {
 		return "", err
 	}
@@ -16,18 +16,16 @@ func (s *service) PayOrder(c context.Context, data model.PayOrderData) (string, 
 		return "", model.ErrOrderCancelConflict
 	}
 
-	transactionUuid, err := s.payment.PayOrder(c, model.PayOrderData{
-		OrderUuid:     data.OrderUuid,
-		UserUuid:      order.UserUuid,
-		PaymentMethod: data.PaymentMethod,
-	})
+	orderData.UserUuid = order.UserUuid
+
+	transactionUuid, err := s.payment.PayOrder(c, orderData)
 	if err != nil {
 		return "", err
 	}
 
 	order.TransactionUuid = transactionUuid
 	order.Status = model.StatusPAID
-	order.PaymentMethod = data.PaymentMethod
+	order.PaymentMethod = orderData.PaymentMethod
 
 	err = s.ordersRepo.Update(order)
 	if err != nil {
