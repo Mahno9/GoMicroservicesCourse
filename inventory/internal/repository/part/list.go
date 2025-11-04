@@ -17,30 +17,40 @@ func (r *repository) ListParts(_ context.Context, filters *domainModel.PartsFilt
 	repoFilters := converter.DomainToRepoFilter(filters)
 
 	for uuid, part := range r.parts {
+		// Check if the part matches all the filters
+		matches := true
+
 		if len(repoFilters.Uuids) > 0 && !lo.Contains(repoFilters.Uuids, uuid) {
-			continue
+			matches = false
 		}
 		if len(repoFilters.Names) > 0 && !lo.Contains(repoFilters.Names, part.Name) {
-			continue
+			matches = false
 		}
 		if len(repoFilters.Categories) > 0 && !lo.Contains(repoFilters.Categories, part.Category) {
-			continue
+			matches = false
 		}
 		if len(repoFilters.ManufacturerCountries) > 0 && !lo.Contains(repoFilters.ManufacturerCountries, part.Manufacturer.Country) {
-			continue
-		}
-		if len(repoFilters.Tags) > 0 {
-			for _, tag := range repoFilters.Tags {
-				if lo.Contains(part.Tags, tag) {
-					parts = append(parts, converter.RepoToDomainPart(part))
-					continue
-				}
-			}
-			continue
+			matches = false
 		}
 
-		// empty filters case
-		parts = append(parts, converter.RepoToDomainPart(part))
+		// Check if any of the part's tags match the filter tags
+		if len(repoFilters.Tags) > 0 {
+			tagMatch := false
+			for _, tag := range repoFilters.Tags {
+				if lo.Contains(part.Tags, tag) {
+					tagMatch = true
+					break
+				}
+			}
+			if !tagMatch {
+				matches = false
+			}
+		}
+
+		// If part matches all filters, add it to the result
+		if matches {
+			parts = append(parts, converter.RepoToDomainPart(part))
+		}
 	}
 
 	return parts, nil
