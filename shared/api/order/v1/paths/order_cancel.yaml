@@ -1,0 +1,22 @@
+parameters:
+  - $ref: ../params/order_uuid.yaml
+
+post:
+  summary: Отмена заказа
+  operationId: OrderCancel
+  tags:
+    - Order
+  responses:
+    '204':
+      description: Заказ успешно отменен
+    '404':
+      description: Заказ не найден
+    '409':
+      description: Заказ уже оплачен и не может быть отменён
+    default:
+      description: Unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: ../components/errors/generic_error.yaml
+

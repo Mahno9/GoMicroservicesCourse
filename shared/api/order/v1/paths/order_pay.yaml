@@ -1,0 +1,42 @@
+parameters:
+  - $ref: ../params/order_uuid.yaml
+
+post:
+  summary: Оплата собранного заказа
+  operationId: PayOrder
+  tags:
+    - Order
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - payment_method
+          properties:
+            payment_method:
+              $ref: ../components/properties/payment_method.yaml
+  responses:
+    '200':
+      description: Оплата заказа прошла усепшно
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - transaction_uuid
+            properties:
+              transaction_uuid:
+                $ref: ../components/properties/transaction_uuid.yaml
+    '409':
+      description: Заказ уже оплачен
+    default:
+      description: Unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: ../components/errors/generic_error.yaml
+
+
+

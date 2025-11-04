@@ -1,0 +1,5 @@
+type: array
+items:
+  type: string
+  description: UUID детали космического корабля
+  example: 234f5678-e89b-12d3-a456-4266
