@@ -1,7 +1,10 @@
 package part
 
 import (
+	"time"
+
 	"github.com/brianvoe/gofakeit/v7"
+	"github.com/samber/lo"
 	"github.com/stretchr/testify/require"
 
 	domainModel "github.com/Mahno9/GoMicroservicesCourse/inventory/internal/model"
@@ -12,7 +15,7 @@ func (s *RepositorySuite) TestGetPartMainFlow() {
 	testPart := s.createTestPart()
 
 	// Добавляем часть в репозиторий
-	s.repository.parts[testPart.Uuid] = testPart
+	s.repository.Add(testPart)
 
 	// Вызываем метод
 	result, err := s.repository.GetPart(s.ctx, testPart.Uuid)
@@ -55,7 +58,7 @@ func (s *RepositorySuite) TestGetPartNotFound() {
 func (s *RepositorySuite) TestGetPartEmptyUuid() {
 	// Создаем тестовую часть
 	testPart := s.createTestPart()
-	s.repository.parts[testPart.Uuid] = testPart
+	s.repository.Add(testPart)
 
 	// Вызываем метод с пустым UUID
 	result, err := s.repository.GetPart(s.ctx, "")
@@ -69,7 +72,7 @@ func (s *RepositorySuite) TestGetPartEmptyUuid() {
 func (s *RepositorySuite) TestGetPartMinimalData() {
 	// Создаем минимальную тестовую часть
 	testPart := s.createMinimalTestPart()
-	s.repository.parts[testPart.Uuid] = testPart
+	s.repository.Add(testPart)
 
 	// Вызываем метод
 	result, err := s.repository.GetPart(s.ctx, testPart.Uuid)
@@ -90,24 +93,63 @@ func (s *RepositorySuite) TestGetPartMinimalData() {
 }
 
 func (s *RepositorySuite) TestGetPartConcurrentAccess() {
-	// Создаем тестовую часть
-	testPart := s.createTestPart()
-	s.repository.parts[testPart.Uuid] = testPart
+	threadCount := 10
+	uuidsPerThread := 1000
+	totalUuids := threadCount * uuidsPerThread
 
-	// Запускаем несколько горутин для проверки конкурентного доступа
-	done := make(chan bool, 10)
-	for i := 0; i < 10; i++ {
+	uuids := make([]string, totalUuids)
+	for i := range uuids {
+		uuids[i] = gofakeit.UUID()
+	}
+
+	cout := make(chan string, totalUuids)
+	done := make(chan bool, threadCount)
+
+	for i := range threadCount {
 		go func() {
-			result, err := s.repository.GetPart(s.ctx, testPart.Uuid)
-			require.NoError(s.T(), err)
-			require.NotNil(s.T(), result)
-			require.Equal(s.T(), testPart.Uuid, result.Uuid)
+			threadUuids := make([]string, uuidsPerThread)
+			copy(threadUuids, uuids[i*uuidsPerThread:(i+1)*uuidsPerThread])
+
+			gofakeit.ShuffleStrings(threadUuids)
+
+			for _, uuid := range threadUuids {
+				for {
+					v, ok := s.repository.Get(uuid)
+					if ok {
+						cout <- v.Uuid
+						break
+					}
+				}
+			}
+
 			done <- true
 		}()
 	}
 
+	// Запись после начала чтения
+	go func() {
+		time.Sleep(10 * time.Millisecond) // nolint: forbidigo
+		for _, uuid := range uuids {
+			testPart := s.createTestPartWithUuid(uuid)
+			s.repository.Add(testPart)
+		}
+	}()
+
+	// Ждём, что все uuid будут считаны
+	for range totalUuids {
+		uuid := <-cout
+		require.True(s.T(), lo.Contains(uuids, uuid))
+
+		uuids = lo.Filter(uuids, func(x string, _ int) bool {
+			return x != uuid
+		})
+	}
+
+	// Проверяем, что все uuid прошли через цикл чтения-записи
+	require.Empty(s.T(), uuids)
+
 	// Ждем завершения всех горутин
-	for i := 0; i < 10; i++ {
+	for range threadCount {
 		<-done
 	}
 }

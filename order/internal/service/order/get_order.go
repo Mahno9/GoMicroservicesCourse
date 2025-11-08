@@ -6,11 +6,9 @@ import (
 	"github.com/Mahno9/GoMicroservicesCourse/order/internal/model"
 )
 
-func (s *service) GetOrder(c context.Context, orderUuid string) (*model.Order, error) {
-	order, err := s.ordersRepo.Get(orderUuid)
-	if err != nil {
-		return nil, err
-	}
+func (s *service) GetOrder(ctx context.Context, orderUuid string) (*model.Order, error) {
+	ctxReq, cancel := context.WithTimeout(ctx, model.RequestTimeoutRead)
+	defer cancel()
 
-	return order, nil
+	return s.orderRepository.Get(ctxReq, orderUuid)
 }

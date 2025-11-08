@@ -14,13 +14,16 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 
 	orderApiHandlerV1 "github.com/Mahno9/GoMicroservicesCourse/order/internal/api/order/v1"
-	inventoryV1 "github.com/Mahno9/GoMicroservicesCourse/order/internal/client/grpc/inventory/v1"
-	paymentV1 "github.com/Mahno9/GoMicroservicesCourse/order/internal/client/grpc/payment/v1"
+	inventoryClientV1 "github.com/Mahno9/GoMicroservicesCourse/order/internal/client/grpc/inventory/v1"
+	paymentClientV1 "github.com/Mahno9/GoMicroservicesCourse/order/internal/client/grpc/payment/v1"
 	orderRepo "github.com/Mahno9/GoMicroservicesCourse/order/internal/repository/order"
 	orderModel "github.com/Mahno9/GoMicroservicesCourse/order/internal/service/order"
-	orderV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/openapi/order/v1"
+	genOrderV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/openapi/order/v1"
+	genInventoryV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/proto/inventory/v1"
+	genPaymentV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/proto/payment/v1"
 )
 
 const (
@@ -32,36 +35,62 @@ const (
 )
 
 func main() {
-	inventory, err := inventoryV1.NewClient(inventoryAddress)
+	// Inventory
+	inventoryConn, err := grpc.NewClient(inventoryAddress,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
 	if err != nil {
-		log.Printf("❗ Failed to create inventory client: %v\n", err)
+		log.Printf("❗ Failed to create inventory connection: %v\n", err)
+		return
 	}
 	defer func() {
-		if err := inventory.Close(); err != nil && !errors.Is(err, grpc.ErrServerStopped) {
+		err := inventoryConn.Close()
+		if err != nil {
 			log.Printf("❗ Failed to close inventory connection: %v\n", err)
 		}
 	}()
 
-	payment, err := paymentV1.NewClient(paymentAddress)
+	inventoryClient := genInventoryV1.NewInventoryServiceClient(inventoryConn)
+
+	inventory, err := inventoryClientV1.NewClient(inventoryClient)
 	if err != nil {
-		log.Printf("❗ Failed to create payment client: %v\n", err)
+		log.Printf("❗ Failed to create inventory client: %v\n", err)
+	}
+
+	// Payment
+	paymentConn, err := grpc.NewClient(paymentAddress,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		log.Printf("❗ Failed to create payment connection: %v\n", err)
+		return
 	}
 	defer func() {
-		if err := payment.Close(); err != nil && !errors.Is(err, grpc.ErrServerStopped) {
+		err := paymentConn.Close()
+		if err != nil {
 			log.Printf("❗ Failed to close payment connection: %v\n", err)
 		}
 	}()
 
+	paymenService := genPaymentV1.NewPaymentServiceClient(paymentConn)
+
+	payment, err := paymentClientV1.NewClient(paymenService)
+	if err != nil {
+		log.Printf("❗ Failed to create payment client: %v\n", err)
+	}
+
+	// Repository
 	repository := orderRepo.NewRepository()
 
 	orderService := orderModel.NewService(inventory, payment, repository)
 	apiHandler := orderApiHandlerV1.NewAPIHandler(orderService)
 
-	orderServer, err := orderV1.NewServer(apiHandler)
+	orderServer, err := genOrderV1.NewServer(apiHandler)
 	if err != nil {
 		panic(err)
 	}
 
+	// HTTP Serving
 	router := chi.NewRouter()
 
 	router.Use(middleware.Logger)
@@ -83,6 +112,7 @@ func main() {
 		}
 	}()
 
+	// Gracefull shutdown
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit

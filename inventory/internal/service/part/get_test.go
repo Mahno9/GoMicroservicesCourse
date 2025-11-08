@@ -42,11 +42,11 @@ func (s *ServiceSuite) TestGetPartMainFlow() {
 				Website: website,
 			},
 			Tags: []string{tag1, tag2},
-			Metadata: func() map[string]*any {
+			Metadata: func() map[string]any {
 				value := any(new(string))
-				return map[string]*any{"key1": &value}
+				return map[string]any{"key1": value}
 			}(),
-			CreatedAt: &now,
+			CreatedAt: now,
 			UpdatedAt: &now,
 		}
 	)
@@ -115,10 +115,10 @@ func (s *ServiceSuite) TestGetPartWithMinimalData() {
 	s.Equal(0.0, result.Price)
 	s.Equal(int64(0), result.StockQuantity)
 	s.Equal(model.CategoryUnknown, result.Category)
+	s.Equal(time.Time{}, result.CreatedAt)
 	s.Nil(result.Dimensions)
 	s.Nil(result.Manufacturer)
 	s.Nil(result.Tags)
 	s.Nil(result.Metadata)
-	s.Nil(result.CreatedAt)
 	s.Nil(result.UpdatedAt)
 }

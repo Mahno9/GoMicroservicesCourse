@@ -4,14 +4,11 @@ import (
 	"context"
 
 	"github.com/Mahno9/GoMicroservicesCourse/order/internal/converter"
-	orderV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/openapi/order/v1"
+	genOrderV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/openapi/order/v1"
 )
 
-func (h *apiHandler) GetOrder(ctx context.Context, params orderV1.GetOrderParams) (orderV1.GetOrderRes, error) {
-	timedCtx, cancel := context.WithTimeout(ctx, commonRequestTimeout)
-	defer cancel()
-
-	order, err := h.orderService.GetOrder(timedCtx, params.OrderUUID)
+func (h *apiHandler) GetOrder(ctx context.Context, params genOrderV1.GetOrderParams) (genOrderV1.GetOrderRes, error) {
+	order, err := h.orderService.GetOrder(ctx, params.OrderUUID)
 
 	return converter.ModelToApiGetOrder(order), err
 }

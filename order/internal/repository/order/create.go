@@ -1,16 +1,18 @@
 package order
 
 import (
+	"context"
+
 	"github.com/Mahno9/GoMicroservicesCourse/order/internal/model"
 	"github.com/Mahno9/GoMicroservicesCourse/order/internal/repository/converter"
 )
 
-func (r *repository) Create(order *model.Order) (*model.Order, error) {
-	r.orders[order.OrderUuid] = converter.ModelToRepositoryOrder(order)
+func (r *repository) Create(ctx context.Context, order *model.Order) (*model.Order, error) {
+	r.mut.Lock()
+	defer r.mut.Unlock()
 
-	storedOrder, ok := r.Get(order.OrderUuid)
-	if ok != nil {
-		return nil, model.ErrOrderDoesNotExist
-	}
-	return storedOrder, nil
+	newOrder := converter.ModelToRepositoryOrder(order)
+	r.orders[order.OrderUuid] = newOrder
+
+	return converter.RepositoryOrderToModel(newOrder), nil
 }

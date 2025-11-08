@@ -7,7 +7,7 @@ import (
 )
 
 type PartService interface {
-	GetPart(c context.Context, uuid string) (*model.Part, error)
-	ListParts(c context.Context, filter *model.PartsFilter) ([]*model.Part, error)
+	GetPart(ctx context.Context, uuid string) (*model.Part, error)
+	ListParts(ctx context.Context, filter *model.PartsFilter) ([]*model.Part, error)
 	InitWithDummy() error
 }

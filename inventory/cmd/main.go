@@ -14,7 +14,7 @@ import (
 	partV1API "github.com/Mahno9/GoMicroservicesCourse/inventory/internal/api/inventory/v1"
 	partRepository "github.com/Mahno9/GoMicroservicesCourse/inventory/internal/repository/part"
 	partService "github.com/Mahno9/GoMicroservicesCourse/inventory/internal/service/part"
-	inventoryV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/proto/inventory/v1"
+	genInventoryV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/proto/inventory/v1"
 )
 
 const (
@@ -44,7 +44,7 @@ func main() {
 	}
 
 	serviceAPI := partV1API.NewAPI(service)
-	inventoryV1.RegisterInventoryServiceServer(grpcServer, serviceAPI)
+	genInventoryV1.RegisterInventoryServiceServer(grpcServer, serviceAPI)
 
 	reflection.Register(grpcServer)
 

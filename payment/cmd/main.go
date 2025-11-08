@@ -13,7 +13,7 @@ import (
 
 	paymentV1API "github.com/Mahno9/GoMicroservicesCourse/payment/internal/api/payment/v1"
 	paymentService "github.com/Mahno9/GoMicroservicesCourse/payment/internal/service/payment"
-	paymentV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/proto/payment/v1"
+	genPaymentV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/proto/payment/v1"
 )
 
 const (
@@ -36,7 +36,7 @@ func main() {
 
 	paymentService := paymentService.NewService()
 	apiService := paymentV1API.NewAPI(paymentService)
-	paymentV1.RegisterPaymentServiceServer(grpcServer, apiService)
+	genPaymentV1.RegisterPaymentServiceServer(grpcServer, apiService)
 
 	reflection.Register(grpcServer)
 

@@ -7,7 +7,7 @@ import (
 )
 
 type PartRepository interface {
-	GetPart(c context.Context, uuid string) (*domainModel.Part, error)
-	ListParts(c context.Context, filter *domainModel.PartsFilter) ([]*domainModel.Part, error)
+	GetPart(ctx context.Context, uuid string) (*domainModel.Part, error)
+	ListParts(ctx context.Context, filter *domainModel.PartsFilter) ([]*domainModel.Part, error)
 	InitWithDummy() error
 }

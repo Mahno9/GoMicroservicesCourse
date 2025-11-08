@@ -30,14 +30,14 @@ func (s *ServiceSuite) TestPayOrderMainFlow() {
 		}
 	)
 
-	s.repository.On("Get", payOrderData.OrderUuid).Return(repoEntity, nil)
+	s.repository.On("Get", mock.Anything, payOrderData.OrderUuid).Return(repoEntity, nil)
 
 	// В методе uuid должен подставиться из заказа.
 	// Делаем здесь это руками для проверки структуры на входе в PayOrder.
 	payOrderData.UserUuid = userUuid
-	s.payment.On("PayOrder", s.ctx, payOrderData).Return(transactionUuid, nil)
+	s.payment.On("PayOrder", mock.Anything, payOrderData).Return(transactionUuid, nil)
 
-	s.repository.On("Update", mock.MatchedBy(func(order *model.Order) bool {
+	s.repository.On("Update", mock.Anything, mock.MatchedBy(func(order *model.Order) bool {
 		return order.OrderUuid == orderUuid &&
 			order.UserUuid == userUuid &&
 			len(order.PartUuids) == 0 && // В оригинальном заказе PartUuids не установлен
@@ -67,7 +67,7 @@ func (s *ServiceSuite) TestPayOrderRepositoryGetError() {
 		repoError = model.ErrOrderDoesNotExist
 	)
 
-	s.repository.On("Get", payOrderData.OrderUuid).Return(nil, repoError)
+	s.repository.On("Get", mock.Anything, payOrderData.OrderUuid).Return(nil, repoError)
 
 	_, err := s.service.PayOrder(s.ctx, payOrderData)
 
@@ -97,7 +97,7 @@ func (s *ServiceSuite) TestPayOrderInvalidStatus() {
 		}
 	)
 
-	s.repository.On("Get", payOrderData.OrderUuid).Return(repoEntity, nil)
+	s.repository.On("Get", mock.Anything, payOrderData.OrderUuid).Return(repoEntity, nil)
 	_, err := s.service.PayOrder(s.ctx, payOrderData)
 
 	s.ErrorIs(err, model.ErrOrderCancelConflict)
@@ -128,10 +128,10 @@ func (s *ServiceSuite) TestPayOrderPaymentServiceError() {
 		paymentError = model.ErrUnknownPaymentMethod
 	)
 
-	s.repository.On("Get", payOrderData.OrderUuid).Return(repoEntity, nil)
+	s.repository.On("Get", mock.Anything, payOrderData.OrderUuid).Return(repoEntity, nil)
 
 	payOrderData.UserUuid = userUuid
-	s.payment.On("PayOrder", s.ctx, payOrderData).Return("", paymentError)
+	s.payment.On("PayOrder", mock.Anything, payOrderData).Return("", paymentError)
 
 	_, err := s.service.PayOrder(s.ctx, payOrderData)
 
@@ -164,12 +164,12 @@ func (s *ServiceSuite) TestPayOrderRepositoryUpdateError() {
 		updateError = model.ErrOrderDoesNotExist
 	)
 
-	s.repository.On("Get", payOrderData.OrderUuid).Return(repoEntity, nil)
+	s.repository.On("Get", mock.Anything, payOrderData.OrderUuid).Return(repoEntity, nil)
 
 	payOrderData.UserUuid = userUuid
-	s.payment.On("PayOrder", s.ctx, payOrderData).Return(transactionUuid, nil)
+	s.payment.On("PayOrder", mock.Anything, payOrderData).Return(transactionUuid, nil)
 
-	s.repository.On("Update", mock.MatchedBy(func(order *model.Order) bool {
+	s.repository.On("Update", mock.Anything, mock.MatchedBy(func(order *model.Order) bool {
 		return order.OrderUuid == orderUuid &&
 			order.UserUuid == userUuid &&
 			order.TotalPrice == totalPrice &&

@@ -34,12 +34,16 @@ func TestRepositoryIntegration(t *testing.T) {
 
 // Вспомогательные функции для создания тестовых данных
 func (s *RepositorySuite) createTestPart() *repoModel.Part {
+	return s.createTestPartWithUuid(gofakeit.UUID())
+}
+
+func (s *RepositorySuite) createTestPartWithUuid(uuid string) *repoModel.Part {
 	now := time.Now()
 	key := gofakeit.Word()
 	value := any(key)
 
 	return &repoModel.Part{
-		Uuid:          gofakeit.UUID(),
+		Uuid:          uuid,
 		Name:          gofakeit.Name(),
 		Description:   gofakeit.Sentence(5),
 		Price:         gofakeit.Float64Range(10.0, 1000.0),
@@ -57,8 +61,8 @@ func (s *RepositorySuite) createTestPart() *repoModel.Part {
 			Website: gofakeit.URL(),
 		},
 		Tags:      []string{gofakeit.Word(), gofakeit.Word()},
-		Metadata:  map[string]*any{"key1": &value},
-		CreatedAt: &now,
+		Metadata:  map[string]any{"key1": value},
+		CreatedAt: now,
 		UpdatedAt: &now,
 	}
 }
@@ -72,6 +76,6 @@ func (s *RepositorySuite) createMinimalTestPart() *repoModel.Part {
 		StockQuantity: 0,
 		Category:      repoModel.CategoryUnknown,
 		Tags:          []string{},
-		Metadata:      make(map[string]*any),
+		Metadata:      make(map[string]any),
 	}
 }

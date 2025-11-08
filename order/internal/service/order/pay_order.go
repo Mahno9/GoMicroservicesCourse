@@ -6,8 +6,11 @@ import (
 	"github.com/Mahno9/GoMicroservicesCourse/order/internal/model"
 )
 
-func (s *service) PayOrder(c context.Context, orderData model.PayOrderData) (string, error) {
-	order, err := s.ordersRepo.Get(orderData.OrderUuid)
+func (s *service) PayOrder(ctx context.Context, orderData model.PayOrderData) (string, error) {
+	reqGetCtx, cancelGet := context.WithTimeout(ctx, model.RequestTimeoutRead)
+	defer cancelGet()
+
+	order, err := s.orderRepository.Get(reqGetCtx, orderData.OrderUuid)
 	if err != nil {
 		return "", err
 	}
@@ -18,7 +21,10 @@ func (s *service) PayOrder(c context.Context, orderData model.PayOrderData) (str
 
 	orderData.UserUuid = order.UserUuid
 
-	transactionUuid, err := s.payment.PayOrder(c, orderData)
+	reqPayCtx, cancelPay := context.WithTimeout(ctx, model.RequestTimeoutUpdate)
+	defer cancelPay()
+
+	transactionUuid, err := s.paymentClient.PayOrder(reqPayCtx, orderData)
 	if err != nil {
 		return "", err
 	}
@@ -27,7 +33,10 @@ func (s *service) PayOrder(c context.Context, orderData model.PayOrderData) (str
 	order.Status = model.StatusPAID
 	order.PaymentMethod = orderData.PaymentMethod
 
-	err = s.ordersRepo.Update(order)
+	reqUpdateCtx, cancelUpdate := context.WithTimeout(ctx, model.RequestTimeoutUpdate)
+	defer cancelUpdate()
+
+	err = s.orderRepository.Update(reqUpdateCtx, order)
 	if err != nil {
 		return "", err
 	}

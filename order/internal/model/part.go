@@ -13,7 +13,7 @@ type Part struct {
 	Manufacturer  *Manufacturer
 	Tags          []string
 	Metadata      map[string]*any
-	CreatedAt     *time.Time
+	CreatedAt     time.Time
 	UpdatedAt     *time.Time
 }
 

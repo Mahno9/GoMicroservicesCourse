@@ -1,6 +1,8 @@
 package model
 
-import "time"
+import (
+	"time"
+)
 
 type Category string
 
@@ -35,8 +37,8 @@ type Part struct {
 	Dimensions    *Dimensions
 	Manufacturer  *Manufacturer
 	Tags          []string
-	Metadata      map[string]*any
-	CreatedAt     *time.Time
+	Metadata      map[string]any
+	CreatedAt     time.Time
 	UpdatedAt     *time.Time
 }
 
@@ -47,5 +49,3 @@ type PartsFilter struct {
 	ManufacturerCountries []string
 	Tags                  []string
 }
-
-type RepoStorage map[string]*Part

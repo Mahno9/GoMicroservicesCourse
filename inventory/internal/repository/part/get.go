@@ -8,10 +8,7 @@ import (
 )
 
 func (r *repository) GetPart(_ context.Context, partUuid string) (*domainModel.Part, error) {
-	r.mut.RLock()
-	defer r.mut.RUnlock()
-
-	part, ok := r.parts[partUuid]
+	part, ok := r.Get(partUuid)
 	if !ok {
 		return nil, domainModel.ErrPartNotFound
 	}

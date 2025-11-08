@@ -1,12 +1,23 @@
 package converter
 
 import (
+	"log"
+
 	"github.com/Mahno9/GoMicroservicesCourse/order/internal/model"
-	inventoryV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/proto/inventory/v1"
-	paymentV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/proto/payment/v1"
+	genInventoryV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/proto/inventory/v1"
+	genPaymentV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/proto/payment/v1"
 )
 
-func InventoryToModelPart(inventoryPart *inventoryV1.Part) (*model.Part, error) {
+func InventoryToModelParts(inventoryParts []*genInventoryV1.Part) ([]*model.Part, error) {
+	parts := make([]*model.Part, len(inventoryParts))
+	for i, part := range inventoryParts {
+		parts[i] = inventoryToModelPart(part)
+	}
+
+	return parts, nil
+}
+
+func inventoryToModelPart(inventoryPart *genInventoryV1.Part) *model.Part {
 	result := &model.Part{
 		Uuid:          inventoryPart.Uuid,
 		Name:          inventoryPart.Name,
@@ -38,13 +49,13 @@ func InventoryToModelPart(inventoryPart *inventoryV1.Part) (*model.Part, error) 
 	for k, v := range inventoryPart.Metadata {
 		var value any
 		switch val := v.Kind.(type) {
-		case *inventoryV1.Value_StringValue:
+		case *genInventoryV1.Value_StringValue:
 			value = val.StringValue
-		case *inventoryV1.Value_Int64Value:
+		case *genInventoryV1.Value_Int64Value:
 			value = val.Int64Value
-		case *inventoryV1.Value_DoubleValue:
+		case *genInventoryV1.Value_DoubleValue:
 			value = val.DoubleValue
-		case *inventoryV1.Value_BoolValue:
+		case *genInventoryV1.Value_BoolValue:
 			value = val.BoolValue
 		}
 		result.Metadata[k] = &value
@@ -52,7 +63,9 @@ func InventoryToModelPart(inventoryPart *inventoryV1.Part) (*model.Part, error) 
 
 	if inventoryPart.CreatedAt != nil {
 		createdTime := inventoryPart.CreatedAt.AsTime()
-		result.CreatedAt = &createdTime
+		result.CreatedAt = createdTime
+	} else {
+		log.Printf("InventoryPart.CreatedAt is nil")
 	}
 
 	if inventoryPart.UpdatedAt != nil {
@@ -60,20 +73,20 @@ func InventoryToModelPart(inventoryPart *inventoryV1.Part) (*model.Part, error) 
 		result.UpdatedAt = &updatedTime
 	}
 
-	return result, nil
+	return result
 }
 
-func ModelToInventoryPartsFilter(modelFilter *model.PartsFilter) *inventoryV1.PartsFilter {
+func ModelToInventoryPartsFilter(modelFilter *model.PartsFilter) *genInventoryV1.PartsFilter {
 	if modelFilter == nil {
 		return nil
 	}
 
-	result := &inventoryV1.PartsFilter{}
+	result := &genInventoryV1.PartsFilter{}
 
 	result.Uuids = append(result.Uuids, modelFilter.Uuids...)
 	result.Names = append(result.Names, modelFilter.Names...)
 	for _, category := range modelFilter.Categories {
-		result.Categories = append(result.Categories, inventoryV1.Category(category))
+		result.Categories = append(result.Categories, genInventoryV1.Category(category))
 	}
 	result.ManufacturerCountries = append(result.ManufacturerCountries, modelFilter.ManufacturerCountries...)
 	result.Tags = append(result.Tags, modelFilter.Tags...)
@@ -81,17 +94,17 @@ func ModelToInventoryPartsFilter(modelFilter *model.PartsFilter) *inventoryV1.Pa
 	return result
 }
 
-func ModelToPaymentPaymentMethod(paymentMethod int32) paymentV1.PaymentMethod {
+func ModelToPaymentPaymentMethod(paymentMethod int32) genPaymentV1.PaymentMethod {
 	switch paymentMethod {
 	case 1:
-		return paymentV1.PaymentMethod_CARD
+		return genPaymentV1.PaymentMethod_CARD
 	case 2:
-		return paymentV1.PaymentMethod_SBP
+		return genPaymentV1.PaymentMethod_SBP
 	case 3:
-		return paymentV1.PaymentMethod_CREDIT_CARD
+		return genPaymentV1.PaymentMethod_CREDIT_CARD
 	case 4:
-		return paymentV1.PaymentMethod_INVESTOR_MONEY
+		return genPaymentV1.PaymentMethod_INVESTOR_MONEY
 	default:
-		return paymentV1.PaymentMethod_UNKNOWN
+		return genPaymentV1.PaymentMethod_UNKNOWN
 	}
 }

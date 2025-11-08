@@ -2,6 +2,7 @@ package order
 
 import (
 	"github.com/brianvoe/gofakeit/v7"
+	"github.com/stretchr/testify/mock"
 
 	"github.com/Mahno9/GoMicroservicesCourse/order/internal/model"
 )
@@ -26,7 +27,7 @@ func (s *ServiceSuite) TestGetOrderMainFlow() {
 		}
 	)
 
-	s.repository.On("Get", orderUuid).Return(expectedOrder, nil)
+	s.repository.On("Get", mock.Anything, orderUuid).Return(expectedOrder, nil)
 
 	result, err := s.service.GetOrder(s.ctx, orderUuid)
 
@@ -40,7 +41,7 @@ func (s *ServiceSuite) TestGetOrderRepositoryError() {
 		expectedError = model.ErrOrderDoesNotExist
 	)
 
-	s.repository.On("Get", orderUuid).Return(nil, expectedError)
+	s.repository.On("Get", mock.Anything, orderUuid).Return(nil, expectedError)
 
 	_, err := s.service.GetOrder(s.ctx, orderUuid)
 

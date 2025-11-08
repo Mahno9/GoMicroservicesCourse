@@ -1,6 +1,8 @@
 package order
 
 import (
+	"sync"
+
 	def "github.com/Mahno9/GoMicroservicesCourse/order/internal/repository"
 	repoModel "github.com/Mahno9/GoMicroservicesCourse/order/internal/repository/model"
 )
@@ -8,6 +10,7 @@ import (
 var _ def.OrderRepository = (*repository)(nil)
 
 type repository struct {
+	mut    sync.RWMutex
 	orders map[string]*repoModel.Order
 }
 

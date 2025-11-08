@@ -6,51 +6,51 @@ import (
 	"net/http"
 
 	"github.com/Mahno9/GoMicroservicesCourse/order/internal/model"
-	orderV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/openapi/order/v1"
+	genOrderV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/openapi/order/v1"
 )
 
-func (h *apiHandler) NewError(_ context.Context, err error) *orderV1.GenericErrorStatusCode {
+func (h *apiHandler) NewError(_ context.Context, err error) *genOrderV1.GenericErrorStatusCode {
 	// Трансляция ошибок из модели в HTTP ошибки
 	switch {
 	case errors.Is(err, model.ErrUnknownPaymentMethod):
-		return &orderV1.GenericErrorStatusCode{
+		return &genOrderV1.GenericErrorStatusCode{
 			StatusCode: http.StatusBadRequest,
-			Response: orderV1.GenericError{
-				Code:    orderV1.NewOptInt(http.StatusBadRequest),
-				Message: orderV1.NewOptString("Unknown payment method"),
+			Response: genOrderV1.GenericError{
+				Code:    genOrderV1.NewOptInt(http.StatusBadRequest),
+				Message: genOrderV1.NewOptString("Unknown payment method"),
 			},
 		}
 	case errors.Is(err, model.ErrPartsNotAvailable):
-		return &orderV1.GenericErrorStatusCode{
+		return &genOrderV1.GenericErrorStatusCode{
 			StatusCode: http.StatusBadRequest,
-			Response: orderV1.GenericError{
-				Code:    orderV1.NewOptInt(http.StatusBadRequest),
-				Message: orderV1.NewOptString("No required parts are available"),
+			Response: genOrderV1.GenericError{
+				Code:    genOrderV1.NewOptInt(http.StatusBadRequest),
+				Message: genOrderV1.NewOptString("No required parts are available"),
 			},
 		}
 	case errors.Is(err, model.ErrOrderDoesNotExist):
-		return &orderV1.GenericErrorStatusCode{
+		return &genOrderV1.GenericErrorStatusCode{
 			StatusCode: http.StatusNotFound,
-			Response: orderV1.GenericError{
-				Code:    orderV1.NewOptInt(http.StatusNotFound),
-				Message: orderV1.NewOptString("Order does not exist"),
+			Response: genOrderV1.GenericError{
+				Code:    genOrderV1.NewOptInt(http.StatusNotFound),
+				Message: genOrderV1.NewOptString("Order does not exist"),
 			},
 		}
 	case errors.Is(err, model.ErrOrderCancelConflict):
-		return &orderV1.GenericErrorStatusCode{
+		return &genOrderV1.GenericErrorStatusCode{
 			StatusCode: http.StatusConflict,
-			Response: orderV1.GenericError{
-				Code:    orderV1.NewOptInt(http.StatusConflict),
-				Message: orderV1.NewOptString("Order cancel conflict"),
+			Response: genOrderV1.GenericError{
+				Code:    genOrderV1.NewOptInt(http.StatusConflict),
+				Message: genOrderV1.NewOptString("Order cancel conflict"),
 			},
 		}
 	default:
 		// Для всех остальных ошибок возвращаем внутреннюю ошибку сервера
-		return &orderV1.GenericErrorStatusCode{
+		return &genOrderV1.GenericErrorStatusCode{
 			StatusCode: http.StatusInternalServerError,
-			Response: orderV1.GenericError{
-				Code:    orderV1.NewOptInt(http.StatusInternalServerError),
-				Message: orderV1.NewOptString(err.Error()),
+			Response: genOrderV1.GenericError{
+				Code:    genOrderV1.NewOptInt(http.StatusInternalServerError),
+				Message: genOrderV1.NewOptString(err.Error()),
 			},
 		}
 	}

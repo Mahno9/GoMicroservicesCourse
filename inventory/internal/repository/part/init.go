@@ -6,7 +6,6 @@ import (
 
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/google/uuid"
-	"github.com/samber/lo"
 
 	repoModel "github.com/Mahno9/GoMicroservicesCourse/inventory/internal/repository/model"
 )
@@ -14,11 +13,8 @@ import (
 func (r *repository) InitWithDummy() error {
 	parts := generateParts()
 
-	r.mut.Lock()
-	defer r.mut.Unlock()
-
 	for _, part := range parts {
-		r.parts[part.Uuid] = part
+		r.Add(part)
 	}
 
 	return nil
@@ -72,7 +68,7 @@ func generateParts() []*repoModel.Part {
 			Manufacturer:  generateManufacturer(),
 			Tags:          generateTags(),
 			Metadata:      generateMetadata(),
-			CreatedAt:     lo.ToPtr(time.Now()),
+			CreatedAt:     time.Now(),
 		})
 	}
 
@@ -105,8 +101,8 @@ func generateTags() []string {
 	return tags
 }
 
-func generateMetadata() map[string]*any {
-	metadata := make(map[string]*any)
+func generateMetadata() map[string]any {
+	metadata := make(map[string]any)
 
 	for i := 0; i < gofakeit.Number(1, 10); i++ {
 		value := generateMetadataValue()

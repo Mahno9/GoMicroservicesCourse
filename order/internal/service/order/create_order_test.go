@@ -49,11 +49,11 @@ func (s *ServiceSuite) TestCreateOrderMainFlow() {
 		}
 	)
 
-	s.inventory.On("ListParts", s.ctx, &model.PartsFilter{
+	s.inventory.On("ListParts", mock.Anything, &model.PartsFilter{
 		Uuids: createOrderData.PartUuids,
 	}).Return(orderParts, nil)
 
-	s.repository.On("Create", mock.MatchedBy(func(order *model.Order) bool {
+	s.repository.On("Create", mock.Anything, mock.MatchedBy(func(order *model.Order) bool {
 		return order.UserUuid == userUuid &&
 			len(order.PartUuids) == 3 &&
 			order.PartUuids[0] == partUuid1 &&
@@ -82,7 +82,7 @@ func (s *ServiceSuite) TestCreateOrderInventoryError() {
 		expectedError = model.ErrPartsNotAvailable
 	)
 
-	s.inventory.On("ListParts", s.ctx, &model.PartsFilter{
+	s.inventory.On("ListParts", mock.Anything, &model.PartsFilter{
 		Uuids: createOrderData.PartUuids,
 	}).Return(nil, expectedError)
 
@@ -117,7 +117,7 @@ func (s *ServiceSuite) TestCreateOrderPartsNotAvailable() {
 		expectedError = model.ErrPartsNotAvailable
 	)
 
-	s.inventory.On("ListParts", s.ctx, &model.PartsFilter{
+	s.inventory.On("ListParts", mock.Anything, &model.PartsFilter{
 		Uuids: createOrderData.PartUuids,
 	}).Return(orderParts, nil)
 
@@ -155,11 +155,11 @@ func (s *ServiceSuite) TestCreateOrderRepositoryCreateError() {
 		expectedError = model.ErrOrderDoesNotExist
 	)
 
-	s.inventory.On("ListParts", s.ctx, &model.PartsFilter{
+	s.inventory.On("ListParts", mock.Anything, &model.PartsFilter{
 		Uuids: createOrderData.PartUuids,
 	}).Return(orderParts, nil)
 
-	s.repository.On("Create", mock.MatchedBy(func(order *model.Order) bool {
+	s.repository.On("Create", mock.Anything, mock.MatchedBy(func(order *model.Order) bool {
 		return order.UserUuid == userUuid &&
 			len(order.PartUuids) == 2 &&
 			order.PartUuids[0] == partUuid1 &&

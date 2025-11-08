@@ -7,17 +7,17 @@ import (
 )
 
 type service struct {
-	inventory  grpc.InventoryClient
-	payment    grpc.PaymentClient
-	ordersRepo repository.OrderRepository
+	inventoryClient grpc.InventoryClient
+	paymentClient   grpc.PaymentClient
+	orderRepository repository.OrderRepository
 }
 
 var _ def.OrderService = (*service)(nil)
 
 func NewService(inventoryClient grpc.InventoryClient, paymentClient grpc.PaymentClient, repository repository.OrderRepository) *service {
 	return &service{
-		inventory:  inventoryClient,
-		payment:    paymentClient,
-		ordersRepo: repository,
+		inventoryClient: inventoryClient,
+		paymentClient:   paymentClient,
+		orderRepository: repository,
 	}
 }

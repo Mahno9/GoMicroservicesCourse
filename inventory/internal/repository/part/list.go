@@ -10,17 +10,14 @@ import (
 )
 
 func (r *repository) ListParts(_ context.Context, filters *domainModel.PartsFilter) ([]*domainModel.Part, error) {
-	r.mut.RLock()
-	defer r.mut.RUnlock()
-
 	parts := make([]*domainModel.Part, 0)
 	repoFilters := converter.DomainToRepoFilter(filters)
 
-	for uuid, part := range r.parts {
+	for _, part := range r.GetAll() {
 		// Check if the part matches all the filters
 		matches := true
 
-		if len(repoFilters.Uuids) > 0 && !lo.Contains(repoFilters.Uuids, uuid) {
+		if len(repoFilters.Uuids) > 0 && !lo.Contains(repoFilters.Uuids, part.Uuid) {
 			matches = false
 		}
 		if len(repoFilters.Names) > 0 && !lo.Contains(repoFilters.Names, part.Name) {

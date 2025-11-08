@@ -37,26 +37,26 @@ func (s *ServiceSuite) TestListPartsMainFlow() {
 		tags3 = []string{gofakeit.Word(), gofakeit.Word()}
 
 		filter = &model.PartsFilter{
-			Uuids: map[string]any{
-				partUuid1: nil,
-				partUuid2: nil,
-				partUuid3: nil,
+			Uuids: []string{
+				partUuid1,
+				partUuid2,
+				partUuid3,
 			},
-			Names: map[string]any{
-				partName1: nil,
-				partName2: nil,
+			Names: []string{
+				partName1,
+				partName2,
 			},
-			Categories: map[model.Category]any{
-				category1: nil,
-				category2: nil,
+			Categories: []model.Category{
+				category1,
+				category2,
 			},
-			ManufacturerCountries: map[string]any{
-				country1: nil,
-				country2: nil,
+			ManufacturerCountries: []string{
+				country1,
+				country2,
 			},
-			Tags: map[string]any{
-				tags1[0]: nil,
-				tags2[1]: nil,
+			Tags: []string{
+				tags1[0],
+				tags2[1],
 			},
 		}
 
@@ -108,8 +108,8 @@ func (s *ServiceSuite) TestListPartsMainFlow() {
 func (s *ServiceSuite) TestListPartsRepositoryError() {
 	var (
 		filter = &model.PartsFilter{
-			Uuids: map[string]any{
-				gofakeit.UUID(): nil,
+			Uuids: []string{
+				gofakeit.UUID(),
 			},
 		}
 
@@ -151,9 +151,9 @@ func (s *ServiceSuite) TestListPartsWithOnlyUuidsFilter() {
 		partUuid2 = gofakeit.UUID()
 
 		filter = &model.PartsFilter{
-			Uuids: map[string]any{
-				partUuid1: nil,
-				partUuid2: nil,
+			Uuids: []string{
+				partUuid1,
+				partUuid2,
 			},
 		}
 

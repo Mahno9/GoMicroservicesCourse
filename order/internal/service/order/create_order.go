@@ -8,8 +8,11 @@ import (
 	"github.com/Mahno9/GoMicroservicesCourse/order/internal/model"
 )
 
-func (s *service) CreateOrder(c context.Context, data model.CreateOrderData) (*model.Order, error) {
-	orderParts, err := s.inventory.ListParts(c, &model.PartsFilter{
+func (s *service) CreateOrder(ctx context.Context, data model.CreateOrderData) (*model.Order, error) {
+	ctxListReq, cancelList := context.WithTimeout(ctx, model.RequestTimeoutRead)
+	defer cancelList()
+
+	orderParts, err := s.inventoryClient.ListParts(ctxListReq, &model.PartsFilter{
 		Uuids: data.PartUuids,
 	})
 	if err != nil {
@@ -20,13 +23,17 @@ func (s *service) CreateOrder(c context.Context, data model.CreateOrderData) (*m
 		return nil, model.ErrPartsNotAvailable
 	}
 
-	totalPrice := float64(0.0)
+	totalPrice := 0.0
 	for _, part := range orderParts {
 		totalPrice += part.Price
 	}
 
 	orderUuid := uuid.New().String()
-	createdOrder, err := s.ordersRepo.Create(&model.Order{
+
+	ctxCreateReq, cancelCreate := context.WithTimeout(ctx, model.RequestTimeoutUpdate)
+	defer cancelCreate()
+
+	createdOrder, err := s.orderRepository.Create(ctxCreateReq, &model.Order{
 		OrderUuid:  orderUuid,
 		UserUuid:   data.UserUuid,
 		PartUuids:  data.PartUuids,

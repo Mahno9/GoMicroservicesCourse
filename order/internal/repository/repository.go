@@ -1,9 +1,13 @@
 package repository
 
-import "github.com/Mahno9/GoMicroservicesCourse/order/internal/model"
+import (
+	"context"
+
+	"github.com/Mahno9/GoMicroservicesCourse/order/internal/model"
+)
 
 type OrderRepository interface {
-	Create(order *model.Order) (*model.Order, error)
-	Get(orderUuid string) (*model.Order, error)
-	Update(order *model.Order) error
+	Create(ctx context.Context, order *model.Order) (*model.Order, error)
+	Get(ctx context.Context, orderUuid string) (*model.Order, error)
+	Update(ctx context.Context, order *model.Order) error
 }

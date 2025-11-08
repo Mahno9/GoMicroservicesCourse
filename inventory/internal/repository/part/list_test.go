@@ -26,15 +26,15 @@ func (s *RepositorySuite) TestListPartsMainFlow() {
 	part3.Tags = []string{"wing", "aerodynamic"}
 
 	// Добавляем части в репозиторий
-	s.repository.parts[part1.Uuid] = part1
-	s.repository.parts[part2.Uuid] = part2
-	s.repository.parts[part3.Uuid] = part3
+	s.repository.Add(part1)
+	s.repository.Add(part2)
+	s.repository.Add(part3)
 
 	// Создаем фильтр - ищем части, которые соответствуют любому из UUID
 	filter := &domainModel.PartsFilter{
-		Uuids: map[string]any{
-			part1.Uuid: nil,
-			part2.Uuid: nil,
+		Uuids: []string{
+			part1.Uuid,
+			part2.Uuid,
 		},
 	}
 
@@ -61,8 +61,8 @@ func (s *RepositorySuite) TestListPartsEmptyFilter() {
 	part2 := s.createTestPart()
 
 	// Добавляем части в репозиторий
-	s.repository.parts[part1.Uuid] = part1
-	s.repository.parts[part2.Uuid] = part2
+	s.repository.Add(part1)
+	s.repository.Add(part2)
 
 	// Создаем пустой фильтр
 	filter := &domainModel.PartsFilter{}
@@ -82,15 +82,15 @@ func (s *RepositorySuite) TestListPartsOnlyUuidsFilter() {
 	part3 := s.createTestPart()
 
 	// Добавляем части в репозиторий
-	s.repository.parts[part1.Uuid] = part1
-	s.repository.parts[part2.Uuid] = part2
-	s.repository.parts[part3.Uuid] = part3
+	s.repository.Add(part1)
+	s.repository.Add(part2)
+	s.repository.Add(part3)
 
 	// Создаем фильтр только с UUID
 	filter := &domainModel.PartsFilter{
-		Uuids: map[string]any{
-			part1.Uuid: nil,
-			part3.Uuid: nil,
+		Uuids: []string{
+			part1.Uuid,
+			part3.Uuid,
 		},
 	}
 
@@ -123,15 +123,15 @@ func (s *RepositorySuite) TestListPartsOnlyTagsFilter() {
 	part3.Tags = []string{"wing", "aerodynamic"}
 
 	// Добавляем части в репозиторий
-	s.repository.parts[part1.Uuid] = part1
-	s.repository.parts[part2.Uuid] = part2
-	s.repository.parts[part3.Uuid] = part3
+	s.repository.Add(part1)
+	s.repository.Add(part2)
+	s.repository.Add(part3)
 
 	// Создаем фильтр только с тегами
 	filter := &domainModel.PartsFilter{
-		Tags: map[string]any{
-			"primary":     nil,
-			"aerodynamic": nil,
+		Tags: []string{
+			"primary",
+			"aerodynamic",
 		},
 	}
 
@@ -155,12 +155,12 @@ func (s *RepositorySuite) TestListPartsOnlyTagsFilter() {
 func (s *RepositorySuite) TestListPartsNoMatches() {
 	// Создаем тестовую часть
 	part1 := s.createTestPart()
-	s.repository.parts[part1.Uuid] = part1
+	s.repository.Add(part1)
 
 	// Создаем фильтр, который не совпадает ни с одной частью
 	filter := &domainModel.PartsFilter{
-		Uuids: map[string]any{
-			gofakeit.UUID(): nil, // Случайный UUID, которого нет в репозитории
+		Uuids: []string{
+			gofakeit.UUID(), // Случайный UUID, которого нет в репозитории
 		},
 	}
 
@@ -192,8 +192,8 @@ func (s *RepositorySuite) TestListPartsConcurrentAccess() {
 	part2 := s.createTestPart()
 
 	// Добавляем части в репозиторий
-	s.repository.parts[part1.Uuid] = part1
-	s.repository.parts[part2.Uuid] = part2
+	s.repository.Add(part1)
+	s.repository.Add(part2)
 
 	// Создаем фильтр
 	filter := &domainModel.PartsFilter{}

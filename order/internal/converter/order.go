@@ -2,10 +2,10 @@ package converter
 
 import (
 	"github.com/Mahno9/GoMicroservicesCourse/order/internal/model"
-	orderV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/openapi/order/v1"
+	genOrderV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/openapi/order/v1"
 )
 
-func ApiToModelOrderInfo(apiOrder *orderV1.CreateOrderReq) model.CreateOrderData {
+func ApiToModelOrderInfo(apiOrder *genOrderV1.CreateOrderReq) model.CreateOrderData {
 	if apiOrder == nil {
 		return model.CreateOrderData{}
 	}
@@ -19,53 +19,53 @@ func ApiToModelOrderInfo(apiOrder *orderV1.CreateOrderReq) model.CreateOrderData
 	}
 }
 
-func ModelToApiGetOrder(modelOrder *model.Order) *orderV1.GetOrderOK {
-	return &orderV1.GetOrderOK{
-		OrderUUID:       orderV1.OrderUUID(modelOrder.OrderUuid),
-		UserUUID:        orderV1.UserUUID(modelOrder.UserUuid),
+func ModelToApiGetOrder(modelOrder *model.Order) *genOrderV1.GetOrderOK {
+	return &genOrderV1.GetOrderOK{
+		OrderUUID:       genOrderV1.OrderUUID(modelOrder.OrderUuid),
+		UserUUID:        genOrderV1.UserUUID(modelOrder.UserUuid),
 		PartUuids:       modelOrder.PartUuids,
-		TotalPrice:      orderV1.TotalPrice(modelOrder.TotalPrice),
-		TransactionUUID: orderV1.TransactionUUID(modelOrder.TransactionUuid),
+		TotalPrice:      genOrderV1.TotalPrice(modelOrder.TotalPrice),
+		TransactionUUID: genOrderV1.TransactionUUID(modelOrder.TransactionUuid),
 		PaymentMethod:   ModelToApiPaymentMethod(modelOrder.PaymentMethod),
 		Status:          ModelToApiOrderStatus(int32(modelOrder.Status)),
 	}
 }
 
-func ModelToApiOrderStatus(modelStatus int32) orderV1.Status {
+func ModelToApiOrderStatus(modelStatus int32) genOrderV1.Status {
 	switch modelStatus {
 	case 1:
-		return orderV1.StatusPAID
+		return genOrderV1.StatusPAID
 	case 2:
-		return orderV1.StatusCANCELLED
+		return genOrderV1.StatusCANCELLED
 	default:
-		return orderV1.StatusPENDINGPAYMENT
+		return genOrderV1.StatusPENDINGPAYMENT
 	}
 }
 
-func ModelToApiPaymentMethod(modelPaymentMethod int32) orderV1.PaymentMethod {
+func ModelToApiPaymentMethod(modelPaymentMethod int32) genOrderV1.PaymentMethod {
 	switch modelPaymentMethod {
 	case 1:
-		return orderV1.PaymentMethodCARD
+		return genOrderV1.PaymentMethodCARD
 	case 2:
-		return orderV1.PaymentMethodSBP
+		return genOrderV1.PaymentMethodSBP
 	case 3:
-		return orderV1.PaymentMethodCREDITCARD
+		return genOrderV1.PaymentMethodCREDITCARD
 	case 4:
-		return orderV1.PaymentMethodINVESTORMONEY
+		return genOrderV1.PaymentMethodINVESTORMONEY
 	default:
-		return orderV1.PaymentMethodUNKNOWN
+		return genOrderV1.PaymentMethodUNKNOWN
 	}
 }
 
-func ApiToModelPaymentMethod(apiPaymentMethod orderV1.PaymentMethod) int32 {
+func ApiToModelPaymentMethod(apiPaymentMethod genOrderV1.PaymentMethod) int32 {
 	switch apiPaymentMethod {
-	case orderV1.PaymentMethodCARD:
+	case genOrderV1.PaymentMethodCARD:
 		return 1
-	case orderV1.PaymentMethodSBP:
+	case genOrderV1.PaymentMethodSBP:
 		return 2
-	case orderV1.PaymentMethodCREDITCARD:
+	case genOrderV1.PaymentMethodCREDITCARD:
 		return 3
-	case orderV1.PaymentMethodINVESTORMONEY:
+	case genOrderV1.PaymentMethodINVESTORMONEY:
 		return 4
 	default:
 		return 0

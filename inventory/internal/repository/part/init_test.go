@@ -8,18 +8,18 @@ import (
 
 func (s *RepositorySuite) TestInitWithDummyMainFlow() {
 	// Проверяем, что репозиторий изначально пуст
-	require.Empty(s.T(), s.repository.parts)
+	require.Empty(s.T(), s.repository.Count())
 
 	// Вызываем метод инициализации
 	err := s.repository.InitWithDummy()
 
 	// Проверяем результат
 	require.NoError(s.T(), err)
-	require.NotEmpty(s.T(), s.repository.parts)
+	require.NotEmpty(s.T(), s.repository)
 
 	// Проверяем, что были созданы части с корректными данными
-	for uuid, part := range s.repository.parts {
-		require.NotEmpty(s.T(), uuid)
+	for _, part := range s.repository.GetAll() {
+		require.NotEmpty(s.T(), part.Uuid)
 		require.NotEmpty(s.T(), part.Name)
 		require.NotEmpty(s.T(), part.Description)
 		require.Greater(s.T(), part.Price, 0.0)
@@ -66,12 +66,12 @@ func (s *RepositorySuite) TestInitWithDummyMultipleCalls() {
 	// Первая инициализация
 	err1 := s.repository.InitWithDummy()
 	require.NoError(s.T(), err1)
-	initialCount := len(s.repository.parts)
+	initialCount := s.repository.Count()
 
 	// Вторая инициализация (должна перезаписать данные)
 	err2 := s.repository.InitWithDummy()
 	require.NoError(s.T(), err2)
-	secondCount := len(s.repository.parts)
+	secondCount := s.repository.Count()
 
 	// Количество частей может отличаться, так как используется случайное количество
 	require.Greater(s.T(), initialCount, 0)
@@ -81,18 +81,18 @@ func (s *RepositorySuite) TestInitWithDummyMultipleCalls() {
 func (s *RepositorySuite) TestInitWithDummyWithExistingData() {
 	// Добавляем существующие данные
 	existingPart := s.createTestPart()
-	s.repository.parts[existingPart.Uuid] = existingPart
-	require.Len(s.T(), s.repository.parts, 1)
+	s.repository.Add(existingPart)
+	require.True(s.T(), s.repository.Count() == 1)
 
 	// Вызываем метод инициализации
 	err := s.repository.InitWithDummy()
 
 	// Проверяем результат
 	require.NoError(s.T(), err)
-	require.Greater(s.T(), len(s.repository.parts), 1) // Должны быть добавлены новые данные
+	require.Greater(s.T(), s.repository.Count(), 1) // Должны быть добавлены новые данные
 
 	// Проверяем, что существующие данные могут быть перезаписаны или дополнены
-	for _, part := range s.repository.parts {
+	for _, part := range s.repository.GetAll() {
 		if part.Uuid == existingPart.Uuid {
 			// Найдена часть с тем же UUID
 			break
@@ -104,10 +104,10 @@ func (s *RepositorySuite) TestInitWithDummyGeneratesValidParts() {
 	// Вызываем метод инициализации
 	err := s.repository.InitWithDummy()
 	require.NoError(s.T(), err)
-	require.NotEmpty(s.T(), s.repository.parts)
+	require.NotEmpty(s.T(), s.repository)
 
 	// Проверяем, что все сгенерированные части имеют валидные UUID
-	for uuid := range s.repository.parts {
+	for _, uuid := range s.repository.GetAll() {
 		require.NotEmpty(s.T(), uuid)
 	}
 
@@ -125,7 +125,8 @@ func (s *RepositorySuite) TestInitWithDummyGeneratesValidParts() {
 		"Stabilizer",
 	}
 
-	for _, part := range s.repository.parts {
+	allParts := s.repository.GetAll()
+	for _, part := range allParts {
 		require.Contains(s.T(), validNames, part.Name)
 	}
 
@@ -143,7 +144,7 @@ func (s *RepositorySuite) TestInitWithDummyGeneratesValidParts() {
 		"Stabilizer":     "Stabilization fin",
 	}
 
-	for _, part := range s.repository.parts {
+	for _, part := range allParts {
 		expectedDesc, exists := validDescriptions[part.Name]
 		require.True(s.T(), exists, "Unexpected part name: %s", part.Name)
 		require.Equal(s.T(), expectedDesc, part.Description)
@@ -154,10 +155,10 @@ func (s *RepositorySuite) TestInitWithDummyPriceRange() {
 	// Вызываем метод инициализации
 	err := s.repository.InitWithDummy()
 	require.NoError(s.T(), err)
-	require.NotEmpty(s.T(), s.repository.parts)
+	require.NotEmpty(s.T(), s.repository)
 
 	// Проверяем, что все цены находятся в допустимом диапазоне (100-10000)
-	for _, part := range s.repository.parts {
+	for _, part := range s.repository.GetAll() {
 		require.GreaterOrEqual(s.T(), part.Price, 100.0)
 		require.LessOrEqual(s.T(), part.Price, 10000.0)
 	}
@@ -167,10 +168,10 @@ func (s *RepositorySuite) TestInitWithDummyStockQuantity() {
 	// Вызываем метод инициализации
 	err := s.repository.InitWithDummy()
 	require.NoError(s.T(), err)
-	require.NotEmpty(s.T(), s.repository.parts)
+	require.NotEmpty(s.T(), s.repository)
 
 	// Проверяем, что все количества в наличии находятся в допустимом диапазоне (1-100)
-	for _, part := range s.repository.parts {
+	for _, part := range s.repository.GetAll() {
 		require.GreaterOrEqual(s.T(), part.StockQuantity, int64(1))
 		require.LessOrEqual(s.T(), part.StockQuantity, int64(100))
 	}

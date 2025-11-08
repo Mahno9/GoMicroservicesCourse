@@ -7,11 +7,11 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/Mahno9/GoMicroservicesCourse/inventory/internal/model"
-	inventoryV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/proto/inventory/v1"
+	genInventoryV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/proto/inventory/v1"
 )
 
 // APIPartToModelPart конвертирует API-модель (protobuf) в модель данных
-func APIPartToModelPart(apiPart *inventoryV1.Part) *model.Part {
+func APIPartToModelPart(apiPart *genInventoryV1.Part) *model.Part {
 	if apiPart == nil {
 		return &model.Part{}
 	}
@@ -26,7 +26,7 @@ func APIPartToModelPart(apiPart *inventoryV1.Part) *model.Part {
 	}
 
 	// Конвертация категории
-	part.Category = apiCategoryToModelCategory(apiPart.GetCategory())
+	part.Category = apiToModelCategory(apiPart.GetCategory())
 
 	// Конвертация размеров
 	if apiDimensions := apiPart.GetDimensions(); apiDimensions != nil {
@@ -49,12 +49,12 @@ func APIPartToModelPart(apiPart *inventoryV1.Part) *model.Part {
 
 	// Конвертация метаданных
 	if apiMetadata := apiPart.GetMetadata(); apiMetadata != nil {
-		part.Metadata = apiMetadataToModelMetadata(&apiMetadata)
+		part.Metadata = apiToModelMetadata(apiMetadata)
 	}
 
 	// Конвертация времени
 	if apiCreatedAt := apiPart.GetCreatedAt(); apiCreatedAt != nil {
-		part.CreatedAt = lo.ToPtr(apiCreatedAt.AsTime())
+		part.CreatedAt = apiCreatedAt.AsTime()
 	}
 
 	if apiUpdatedAt := apiPart.GetUpdatedAt(); apiUpdatedAt != nil {
@@ -64,9 +64,9 @@ func APIPartToModelPart(apiPart *inventoryV1.Part) *model.Part {
 	return &part
 }
 
-// ModelPartToAPIPart конвертирует модель данных в API-модель (protobuf)
-func ModelPartToAPIPart(modelPart *model.Part) *inventoryV1.Part {
-	apiPart := &inventoryV1.Part{
+// ModelToAPIPart конвертирует модель данных в API-модель (protobuf)
+func ModelToAPIPart(modelPart *model.Part) *genInventoryV1.Part {
+	apiPart := &genInventoryV1.Part{
 		Uuid:          modelPart.Uuid,
 		Name:          modelPart.Name,
 		Description:   modelPart.Description,
@@ -76,11 +76,11 @@ func ModelPartToAPIPart(modelPart *model.Part) *inventoryV1.Part {
 	}
 
 	// Конвертация категории
-	apiPart.Category = modelCategoryToAPICategory(modelPart.Category)
+	apiPart.Category = modelToAPICategory(modelPart.Category)
 
 	// Конвертация размеров
 	if modelDimensions := modelPart.Dimensions; modelDimensions != nil {
-		apiPart.Dimensions = &inventoryV1.Dimensions{
+		apiPart.Dimensions = &genInventoryV1.Dimensions{
 			Length: modelDimensions.Length,
 			Width:  modelDimensions.Width,
 			Height: modelDimensions.Height,
@@ -90,7 +90,7 @@ func ModelPartToAPIPart(modelPart *model.Part) *inventoryV1.Part {
 
 	// Конвертация производителя
 	if modelManufacturer := modelPart.Manufacturer; modelManufacturer != nil {
-		apiPart.Manufacturer = &inventoryV1.Manufacturer{
+		apiPart.Manufacturer = &genInventoryV1.Manufacturer{
 			Name:    modelManufacturer.Name,
 			Country: modelManufacturer.Country,
 			Website: modelManufacturer.Website,
@@ -99,13 +99,11 @@ func ModelPartToAPIPart(modelPart *model.Part) *inventoryV1.Part {
 
 	// Конвертация метаданных
 	if modelMetadata := modelPart.Metadata; modelMetadata != nil {
-		apiPart.Metadata = modelMetadataToAPIMetadata(&modelMetadata)
+		apiPart.Metadata = modelMetadataToAPIMetadata(modelMetadata)
 	}
 
 	// Конвертация времени
-	if modelCreatedAt := modelPart.CreatedAt; modelCreatedAt != nil {
-		apiPart.CreatedAt = timestamppb.New(*modelCreatedAt)
-	}
+	apiPart.CreatedAt = timestamppb.New(modelPart.CreatedAt)
 
 	if modelUpdatedAt := modelPart.UpdatedAt; modelUpdatedAt != nil {
 		apiPart.UpdatedAt = timestamppb.New(*modelUpdatedAt)
@@ -114,87 +112,87 @@ func ModelPartToAPIPart(modelPart *model.Part) *inventoryV1.Part {
 	return apiPart
 }
 
-// apiCategoryToModelCategory конвертирует категорию из API в модель
-func apiCategoryToModelCategory(apiCategory inventoryV1.Category) model.Category {
+// apiToModelCategory конвертирует категорию из API в модель
+func apiToModelCategory(apiCategory genInventoryV1.Category) model.Category {
 	switch apiCategory {
-	case inventoryV1.Category_ENGINE:
+	case genInventoryV1.Category_ENGINE:
 		return model.CategoryEngine
-	case inventoryV1.Category_FUEL:
+	case genInventoryV1.Category_FUEL:
 		return model.CategoryFuel
-	case inventoryV1.Category_PORTHOLE:
+	case genInventoryV1.Category_PORTHOLE:
 		return model.CategoryPorthole
-	case inventoryV1.Category_WING:
+	case genInventoryV1.Category_WING:
 		return model.CategoryWing
 	default:
 		return model.CategoryUnknown
 	}
 }
 
-// modelCategoryToAPICategory конвертирует категорию из модели в API
-func modelCategoryToAPICategory(modelCategory model.Category) inventoryV1.Category {
+// modelToAPICategory конвертирует категорию из модели в API
+func modelToAPICategory(modelCategory model.Category) genInventoryV1.Category {
 	switch modelCategory {
 	case model.CategoryEngine:
-		return inventoryV1.Category_ENGINE
+		return genInventoryV1.Category_ENGINE
 	case model.CategoryFuel:
-		return inventoryV1.Category_FUEL
+		return genInventoryV1.Category_FUEL
 	case model.CategoryPorthole:
-		return inventoryV1.Category_PORTHOLE
+		return genInventoryV1.Category_PORTHOLE
 	case model.CategoryWing:
-		return inventoryV1.Category_WING
+		return genInventoryV1.Category_WING
 	default:
-		return inventoryV1.Category_UNKNOWN
+		return genInventoryV1.Category_UNKNOWN
 	}
 }
 
-// apiMetadataToModelMetadata конвертирует метаданные из API в модель
-func apiMetadataToModelMetadata(apiMetadata *map[string]*inventoryV1.Value) map[string]*any {
+// apiToModelMetadata конвертирует метаданные из API в модель
+func apiToModelMetadata(apiMetadata map[string]*genInventoryV1.Value) map[string]any {
 	if apiMetadata == nil {
 		return nil
 	}
 
-	modelMetadata := make(map[string]*any)
-	for key, value := range *apiMetadata {
+	modelMetadata := make(map[string]any)
+	for key, value := range apiMetadata {
 		var val any
 		switch v := value.GetKind().(type) {
-		case *inventoryV1.Value_StringValue:
+		case *genInventoryV1.Value_StringValue:
 			val = v.StringValue
-		case *inventoryV1.Value_Int64Value:
+		case *genInventoryV1.Value_Int64Value:
 			val = v.Int64Value
-		case *inventoryV1.Value_DoubleValue:
+		case *genInventoryV1.Value_DoubleValue:
 			val = v.DoubleValue
-		case *inventoryV1.Value_BoolValue:
+		case *genInventoryV1.Value_BoolValue:
 			val = v.BoolValue
 		}
-		modelMetadata[key] = &val
+		modelMetadata[key] = val
 	}
 	return modelMetadata
 }
 
 // modelMetadataToAPIMetadata конвертирует метаданные из модели в API
-func modelMetadataToAPIMetadata(modelMetadata *map[string]*any) map[string]*inventoryV1.Value {
+func modelMetadataToAPIMetadata(modelMetadata map[string]any) map[string]*genInventoryV1.Value {
 	if modelMetadata == nil {
 		return nil
 	}
 
-	apiMetadata := make(map[string]*inventoryV1.Value)
-	for key, value := range *modelMetadata {
+	apiMetadata := make(map[string]*genInventoryV1.Value)
+	for key, value := range modelMetadata {
 		if value == nil {
 			continue
 		}
 
-		var apiValue *inventoryV1.Value
-		switch v := (*value).(type) {
+		var apiValue *genInventoryV1.Value
+		switch v := value.(type) {
 		case string:
-			apiValue = &inventoryV1.Value{Kind: &inventoryV1.Value_StringValue{StringValue: v}}
+			apiValue = &genInventoryV1.Value{Kind: &genInventoryV1.Value_StringValue{StringValue: v}}
 		case int64:
-			apiValue = &inventoryV1.Value{Kind: &inventoryV1.Value_Int64Value{Int64Value: v}}
+			apiValue = &genInventoryV1.Value{Kind: &genInventoryV1.Value_Int64Value{Int64Value: v}}
 		case float64:
-			apiValue = &inventoryV1.Value{Kind: &inventoryV1.Value_DoubleValue{DoubleValue: v}}
+			apiValue = &genInventoryV1.Value{Kind: &genInventoryV1.Value_DoubleValue{DoubleValue: v}}
 		case bool:
-			apiValue = &inventoryV1.Value{Kind: &inventoryV1.Value_BoolValue{BoolValue: v}}
+			apiValue = &genInventoryV1.Value{Kind: &genInventoryV1.Value_BoolValue{BoolValue: v}}
 		default:
 			// Для других типов используем строковое представление
-			apiValue = &inventoryV1.Value{Kind: &inventoryV1.Value_StringValue{StringValue: fmt.Sprintf("%v", v)}}
+			apiValue = &genInventoryV1.Value{Kind: &genInventoryV1.Value_StringValue{StringValue: fmt.Sprintf("%v", v)}}
 		}
 		apiMetadata[key] = apiValue
 	}
@@ -202,75 +200,36 @@ func modelMetadataToAPIMetadata(modelMetadata *map[string]*any) map[string]*inve
 }
 
 // APIPartToModelFilter конвертирует API-фильтр в модель фильтра
-func APIPartToModelFilter(apiFilter *inventoryV1.PartsFilter) *model.PartsFilter {
+func APIPartToModelFilter(apiFilter *genInventoryV1.PartsFilter) *model.PartsFilter {
 	if apiFilter == nil {
 		return &model.PartsFilter{}
 	}
 
-	filter := model.PartsFilter{}
-
-	// Конвертация uuids из slice в map
-	apiUuids := apiFilter.GetUuids()
-	if len(apiUuids) > 0 {
-		filter.Uuids = make(map[string]any, len(apiUuids))
-		for _, uuid := range apiUuids {
-			filter.Uuids[uuid] = true
-		}
+	filter := model.PartsFilter{
+		Uuids:                 apiFilter.GetUuids(),
+		Names:                 apiFilter.GetNames(),
+		ManufacturerCountries: apiFilter.GetManufacturerCountries(),
+		Tags:                  apiFilter.GetTags(),
 	}
 
-	// Конвертация names из slice в map
-	apiNames := apiFilter.GetNames()
-	if len(apiNames) > 0 {
-		filter.Names = make(map[string]any, len(apiNames))
-		for _, name := range apiNames {
-			filter.Names[name] = true
-		}
-	}
-
-	// Конвертация categories из slice в map
-	apiCategories := apiFilter.GetCategories()
-	if len(apiCategories) > 0 {
-		filter.Categories = make(map[model.Category]any, len(apiCategories))
-		for _, apiCategory := range apiCategories {
-			filter.Categories[apiCategoryToModelCategory(apiCategory)] = true
-		}
-	}
-
-	// Конвертация manufacturerCountries из slice в map
-	apiCountries := apiFilter.GetManufacturerCountries()
-	if len(apiCountries) > 0 {
-		filter.ManufacturerCountries = make(map[string]any, len(apiCountries))
-		for _, country := range apiCountries {
-			filter.ManufacturerCountries[country] = true
-		}
-	}
-
-	// Конвертация tags из slice в map
-	apiTags := apiFilter.GetTags()
-	if len(apiTags) > 0 {
-		filter.Tags = make(map[string]any, len(apiTags))
-		for _, tag := range apiTags {
-			filter.Tags[tag] = true
-		}
+	filter.Categories = make([]model.Category, len(apiFilter.Categories))
+	for i, apiCategory := range apiFilter.GetCategories() {
+		filter.Categories[i] = apiToModelCategory(apiCategory)
 	}
 
 	return &filter
 }
 
 // ModelToApiParts конвертирует срез моделей частей в срез API-частей
-func ModelToApiParts(modelParts []*model.Part) *inventoryV1.ListPartsResponse {
+func ModelToApiParts(modelParts []*model.Part) []*genInventoryV1.Part {
 	if modelParts == nil {
-		return &inventoryV1.ListPartsResponse{
-			Parts: []*inventoryV1.Part{},
-		}
+		return nil
 	}
 
-	apiParts := make([]*inventoryV1.Part, len(modelParts))
+	apiParts := make([]*genInventoryV1.Part, len(modelParts))
 	for i, modelPart := range modelParts {
-		apiParts[i] = ModelPartToAPIPart(modelPart)
+		apiParts[i] = ModelToAPIPart(modelPart)
 	}
 
-	return &inventoryV1.ListPartsResponse{
-		Parts: apiParts,
-	}
+	return apiParts
 }

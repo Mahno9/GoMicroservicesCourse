@@ -24,8 +24,8 @@ func (s *ServiceSuite) TestOrderCancelMainFlow() {
 		}
 	)
 
-	s.repository.On("Get", orderUuid).Return(order, nil)
-	s.repository.On("Update", mock.MatchedBy(func(order *model.Order) bool {
+	s.repository.On("Get", mock.Anything, orderUuid).Return(order, nil)
+	s.repository.On("Update", mock.Anything, mock.MatchedBy(func(order *model.Order) bool {
 		return order.OrderUuid == orderUuid &&
 			order.UserUuid == userUuid &&
 			len(order.PartUuids) == 2 &&
@@ -46,7 +46,7 @@ func (s *ServiceSuite) TestOrderCancelRepositoryGetError() {
 		expectedError = model.ErrOrderDoesNotExist
 	)
 
-	s.repository.On("Get", orderUuid).Return(nil, expectedError)
+	s.repository.On("Get", mock.Anything, orderUuid).Return(nil, expectedError)
 
 	err := s.service.OrderCancel(s.ctx, orderUuid)
 
@@ -72,7 +72,7 @@ func (s *ServiceSuite) TestOrderCancelInvalidStatus() {
 		expectedError = model.ErrOrderCancelConflict
 	)
 
-	s.repository.On("Get", orderUuid).Return(order, nil)
+	s.repository.On("Get", mock.Anything, orderUuid).Return(order, nil)
 
 	err := s.service.OrderCancel(s.ctx, orderUuid)
 
@@ -98,8 +98,8 @@ func (s *ServiceSuite) TestOrderCancelRepositoryUpdateError() {
 		expectedError = model.ErrOrderDoesNotExist
 	)
 
-	s.repository.On("Get", orderUuid).Return(order, nil)
-	s.repository.On("Update", mock.MatchedBy(func(order *model.Order) bool {
+	s.repository.On("Get", mock.Anything, orderUuid).Return(order, nil)
+	s.repository.On("Update", mock.Anything, mock.MatchedBy(func(order *model.Order) bool {
 		return order.OrderUuid == orderUuid &&
 			order.UserUuid == userUuid &&
 			len(order.PartUuids) == 1 &&

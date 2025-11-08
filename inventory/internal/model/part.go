@@ -35,15 +35,15 @@ type Part struct {
 	Dimensions    *Dimensions
 	Manufacturer  *Manufacturer
 	Tags          []string
-	Metadata      map[string]*any
-	CreatedAt     *time.Time
+	Metadata      map[string]any
+	CreatedAt     time.Time
 	UpdatedAt     *time.Time
 }
 
 type PartsFilter struct {
-	Uuids                 map[string]any
-	Names                 map[string]any
-	Categories            map[Category]any
-	ManufacturerCountries map[string]any
-	Tags                  map[string]any
+	Uuids                 []string
+	Names                 []string
+	Categories            []Category
+	ManufacturerCountries []string
+	Tags                  []string
 }
