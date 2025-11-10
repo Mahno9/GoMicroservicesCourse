@@ -11,7 +11,10 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
-	inventoryV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/proto/inventory/v1"
+	partV1API "github.com/Mahno9/GoMicroservicesCourse/inventory/internal/api/inventory/v1"
+	partRepository "github.com/Mahno9/GoMicroservicesCourse/inventory/internal/repository/part"
+	partService "github.com/Mahno9/GoMicroservicesCourse/inventory/internal/service/part"
+	genInventoryV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/proto/inventory/v1"
 )
 
 const (
@@ -32,11 +35,16 @@ func main() {
 
 	grpcServer := grpc.NewServer()
 
-	service := &inventoryService{
-		parts: map[string]*inventoryV1.Part{},
+	partRepo := partRepository.NewRepository()
+	service := partService.NewService(partRepo)
+	err = service.InitWithDummy() // init with dummy data
+	if err != nil {
+		log.Printf("❗ failed to init with dummy data: %v\n", err)
+		return
 	}
-	service.initParts() // init with dummy data
-	inventoryV1.RegisterInventoryServiceServer(grpcServer, service)
+
+	serviceAPI := partV1API.NewAPI(service)
+	genInventoryV1.RegisterInventoryServiceServer(grpcServer, serviceAPI)
 
 	reflection.Register(grpcServer)
 
