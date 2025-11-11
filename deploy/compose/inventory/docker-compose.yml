@@ -1,0 +1,39 @@
+services:
+
+  mongo-inventory:
+    image: mongo:7.0.5
+    container_name: mongo-inventory
+
+    environment:
+      MONGO_INITDB_DATABSE: inventory-service
+      MONGO_INITDB_ROOT_USERNAME: ${INVENTORY_DB_DEFAULT_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${INVENTORY_DB_DEFAULT_PASSWORD}
+
+    volumes:
+      - mongo_inventory_data:/data/db
+
+    ports:
+      - ${INVENTORY_DB_PORT}:27017
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "mongo --eval \"db.stats()\"",
+        ]
+        # TODO: recheck this test
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    
+    restart: unless-stopped
+
+    networks:
+      - microservices-net
+
+volumes:
+  mongo_inventory_data:
+
+networks:
+  microservices-net:
+    external: true

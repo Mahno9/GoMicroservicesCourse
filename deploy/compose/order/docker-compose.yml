@@ -1,0 +1,30 @@
+services:
+
+  postgres-order:
+    image: postgres:17.0-alpine3.20
+    container_name: postgres-order
+
+    environment:
+      POSTGRE_DB: order-service
+      POSTGRES_USER: ${ORDER_DB_DEFAULT_USER}
+      POSTGRES_PASSWORD: ${ORDER_DB_DEFAULT_PASSWORD}
+
+    volumes:
+      - postgres_order_data:/var/lib/postgresql/data
+
+    ports:
+      - ${ORDER_DB_PORT}:5432
+
+    restart: unless-stopped
+
+    networks:
+      - microservices-net
+
+volumes:
+  postgres_order_data:
+
+networks:
+  microservices-net:
+    name: microservices-net
+    external: true
+
