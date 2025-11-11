@@ -2,19 +2,40 @@ package order
 
 import (
 	"context"
+	"log"
+
+	sq "github.com/Masterminds/squirrel"
+	"github.com/jackc/pgx/v5"
 
 	"github.com/Mahno9/GoMicroservicesCourse/order/internal/model"
 	"github.com/Mahno9/GoMicroservicesCourse/order/internal/repository/converter"
+	repoModel "github.com/Mahno9/GoMicroservicesCourse/order/internal/repository/model"
 )
 
-func (r *repository) Get(_ context.Context, orderUuid string) (*model.Order, error) {
-	r.mut.RLock()
-	defer r.mut.RUnlock()
+func (r *repository) Get(ctx context.Context, orderUuid string) (*model.Order, error) {
+	builderSelect := sq.Select("*").
+		From("orders").
+		Where(sq.Eq{"order_uuid": orderUuid}).
+		PlaceholderFormat(sq.Dollar)
 
-	repoOrder, exists := r.orders[orderUuid]
-	if !exists {
-		return nil, model.ErrOrderDoesNotExist
+	query, args, err := builderSelect.ToSql()
+	if err != nil {
+		log.Printf("❗ [Get] Failed to build query: %v\n", err)
+		return nil, model.ErrQueryBuild
 	}
 
-	return converter.RepositoryOrderToModel(repoOrder), nil
+	rows, err := r.dbConnPool.Query(ctx, query, args...)
+	if err != nil {
+		log.Printf("❗ [Get] Failed to execute query: %v\n", err)
+		return nil, model.ErrQueryExecution
+	}
+	defer rows.Close()
+
+	repoOrder, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[repoModel.Order])
+	if err != nil {
+		log.Printf("❗ [Get] Failed to scan row into struct: %v\n", err)
+		return nil, model.ErrQueryResponseScanning
+	}
+
+	return converter.RepositoryToModelOrder(&repoOrder), nil
 }
