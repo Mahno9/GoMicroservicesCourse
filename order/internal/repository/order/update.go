@@ -11,17 +11,16 @@ import (
 )
 
 func (r *repository) Update(ctx context.Context, order *model.Order) error {
-	modelOrder := converter.ModelToRepositoryOrder(order)
+	repoOrder := converter.ModelToRepositoryOrder(order)
 
 	builderUpdate := sq.Update("orders").
 		PlaceholderFormat(sq.Dollar).
-		Set("order_uuid", modelOrder.OrderUuid).
-		Set("user_uuid", modelOrder.UserUuid).
-		Set("part_uuids", modelOrder.PartUuids).
-		Set("transaction_uuid", modelOrder.TransactionUuid).
-		Set("payment_method", modelOrder.PaymentMethod).
-		Set("order_status", modelOrder.Status).
-		Where(sq.Eq{"order_uuid": modelOrder.OrderUuid})
+		Set("user_uuid", repoOrder.UserUuid).
+		Set("part_uuids", repoOrder.PartUuids).
+		Set("transaction_uuid", repoOrder.TransactionUuid).
+		Set("payment_method", repoOrder.PaymentMethod).
+		Set("order_status", repoOrder.Status).
+		Where(sq.Eq{"order_uuid": repoOrder.OrderUuid})
 
 	query, args, err := builderUpdate.ToSql()
 	if err != nil {
@@ -31,7 +30,7 @@ func (r *repository) Update(ctx context.Context, order *model.Order) error {
 
 	_, err = r.dbConnPool.Exec(ctx, query, args...)
 	if err != nil {
-		log.Printf("❗ [Update] Failed to execute query: %v\n", err)
+		log.Printf("❗ [Update] Failed to execute query: %v\nQUERY: [%s}\nARGS: %+v\n", err, query, args)
 		return model.ErrQueryExecution
 	}
 

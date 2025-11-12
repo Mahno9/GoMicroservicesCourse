@@ -15,7 +15,6 @@ const (
 )
 
 type Order struct {
-	Id              int      `db:"id"`
 	OrderUuid       string   `db:"order_uuid"`
 	UserUuid        string   `db:"user_uuid"`
 	PartUuids       []string `db:"part_uuids"`

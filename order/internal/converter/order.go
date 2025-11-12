@@ -1,6 +1,8 @@
 package converter
 
 import (
+	"github.com/samber/lo"
+
 	"github.com/Mahno9/GoMicroservicesCourse/order/internal/model"
 	genOrderV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/openapi/order/v1"
 )
@@ -25,7 +27,7 @@ func ModelToApiGetOrder(modelOrder *model.Order) *genOrderV1.GetOrderOK {
 		UserUUID:        genOrderV1.UserUUID(modelOrder.UserUuid),
 		PartUuids:       modelOrder.PartUuids,
 		TotalPrice:      genOrderV1.TotalPrice(modelOrder.TotalPrice),
-		TransactionUUID: genOrderV1.TransactionUUID(modelOrder.TransactionUuid),
+		TransactionUUID: genOrderV1.TransactionUUID(lo.FromPtr(modelOrder.TransactionUuid)),
 		PaymentMethod:   ModelToApiPaymentMethod(modelOrder.PaymentMethod),
 		Status:          ModelToApiOrderStatus(int32(modelOrder.Status)),
 	}

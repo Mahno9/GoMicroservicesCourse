@@ -17,8 +17,8 @@ func (r *repository) Create(ctx context.Context, order *model.Order) (*model.Ord
 
 	builderInsert := sq.Insert("orders").
 		PlaceholderFormat(sq.Dollar).
-		Columns("order_uuid", "user_uuid", "part_uuids", "total_price", "payment_method", "order_status").
-		Values(newOrder.OrderUuid, newOrder.UserUuid, newOrder.PartUuids, newOrder.TotalPrice, newOrder.PaymentMethod, newOrder.Status).
+		Columns("user_uuid", "part_uuids", "total_price", "payment_method", "order_status").
+		Values(newOrder.UserUuid, newOrder.PartUuids, newOrder.TotalPrice, newOrder.PaymentMethod, newOrder.Status).
 		Suffix("RETURNING *")
 
 	query, args, err := builderInsert.ToSql()
@@ -37,7 +37,7 @@ func (r *repository) Create(ctx context.Context, order *model.Order) (*model.Ord
 	repoOrderResult, err := pgx.CollectOneRow(rows, pgx.RowToStructByName[repoModel.Order])
 	if err != nil {
 		log.Printf("❗ [Create] Failed to scan row into struct: %v\n", err)
-		return nil, model.ErrQueryResponseScanning // Consider a more specific error if pgx.ErrNoRows is possible
+		return nil, model.ErrQueryResponseScanning
 	}
 
 	return converter.RepositoryToModelOrder(&repoOrderResult), nil

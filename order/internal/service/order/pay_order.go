@@ -29,7 +29,7 @@ func (s *service) PayOrder(ctx context.Context, orderData model.PayOrderData) (s
 		return "", err
 	}
 
-	order.TransactionUuid = transactionUuid
+	order.TransactionUuid = &transactionUuid
 	order.Status = model.StatusPAID
 	order.PaymentMethod = orderData.PaymentMethod
 

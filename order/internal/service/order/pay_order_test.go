@@ -43,7 +43,7 @@ func (s *ServiceSuite) TestPayOrderMainFlow() {
 			len(order.PartUuids) == 0 && // В оригинальном заказе PartUuids не установлен
 			order.TotalPrice == totalPrice &&
 			order.Status == model.StatusPAID &&
-			order.TransactionUuid == transactionUuid &&
+			*order.TransactionUuid == transactionUuid &&
 			order.PaymentMethod == paymentMethod
 	})).Return(nil)
 
@@ -174,7 +174,7 @@ func (s *ServiceSuite) TestPayOrderRepositoryUpdateError() {
 			order.UserUuid == userUuid &&
 			order.TotalPrice == totalPrice &&
 			order.Status == model.StatusPAID &&
-			order.TransactionUuid == transactionUuid &&
+			*order.TransactionUuid == transactionUuid &&
 			order.PaymentMethod == paymentMethod
 	})).Return(updateError)
 

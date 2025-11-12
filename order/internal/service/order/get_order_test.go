@@ -9,12 +9,12 @@ import (
 
 func (s *ServiceSuite) TestGetOrderMainFlow() {
 	var (
-		orderUuid   = gofakeit.UUID()
-		userUuid    = gofakeit.UUID()
-		partUuid1   = gofakeit.UUID()
-		partUuid2   = gofakeit.UUID()
-		totalPrice  = gofakeit.Float64()
-		paymentData = gofakeit.UUID()
+		orderUuid       = gofakeit.UUID()
+		userUuid        = gofakeit.UUID()
+		partUuid1       = gofakeit.UUID()
+		partUuid2       = gofakeit.UUID()
+		totalPrice      = gofakeit.Float64()
+		transactionUuid = gofakeit.UUID()
 
 		expectedOrder = &model.Order{
 			OrderUuid:       orderUuid,
@@ -22,7 +22,7 @@ func (s *ServiceSuite) TestGetOrderMainFlow() {
 			PartUuids:       []string{partUuid1, partUuid2},
 			TotalPrice:      totalPrice,
 			Status:          model.StatusPAID,
-			TransactionUuid: paymentData,
+			TransactionUuid: &transactionUuid,
 			PaymentMethod:   int32(gofakeit.Number(0, 4)),
 		}
 	)

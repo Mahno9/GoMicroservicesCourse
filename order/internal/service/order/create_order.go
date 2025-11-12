@@ -3,8 +3,6 @@ package order
 import (
 	"context"
 
-	"github.com/google/uuid"
-
 	"github.com/Mahno9/GoMicroservicesCourse/order/internal/model"
 )
 
@@ -28,13 +26,10 @@ func (s *service) CreateOrder(ctx context.Context, data model.CreateOrderData) (
 		totalPrice += part.Price
 	}
 
-	orderUuid := uuid.New().String()
-
 	ctxCreateReq, cancelCreate := context.WithTimeout(ctx, model.RequestTimeoutUpdate)
 	defer cancelCreate()
 
 	createdOrder, err := s.orderRepository.Create(ctxCreateReq, &model.Order{
-		OrderUuid:  orderUuid,
 		UserUuid:   data.UserUuid,
 		PartUuids:  data.PartUuids,
 		TotalPrice: totalPrice,

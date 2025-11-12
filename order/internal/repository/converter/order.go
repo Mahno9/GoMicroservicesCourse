@@ -1,8 +1,6 @@
 package converter
 
 import (
-	"github.com/samber/lo"
-
 	"github.com/Mahno9/GoMicroservicesCourse/order/internal/model"
 	repoModel "github.com/Mahno9/GoMicroservicesCourse/order/internal/repository/model"
 )
@@ -18,7 +16,7 @@ func ModelToRepositoryOrder(order *model.Order) *repoModel.Order {
 		UserUuid:        order.UserUuid,
 		PartUuids:       order.PartUuids,
 		TotalPrice:      order.TotalPrice,
-		TransactionUuid: lo.ToPtr(order.TransactionUuid),
+		TransactionUuid: order.TransactionUuid,
 		PaymentMethod:   modelToRepoPaymentMethod(order.PaymentMethod),
 		Status:          modelToRepoStatus(order.Status),
 	}
@@ -35,7 +33,7 @@ func RepositoryToModelOrder(order *repoModel.Order) *model.Order {
 		UserUuid:        order.UserUuid,
 		PartUuids:       order.PartUuids,
 		TotalPrice:      order.TotalPrice,
-		TransactionUuid: lo.FromPtr(order.TransactionUuid),
+		TransactionUuid: order.TransactionUuid,
 		PaymentMethod:   repoToModelPaymentMethod(order.PaymentMethod),
 		Status:          repoToModelStatus(order.Status),
 	}
