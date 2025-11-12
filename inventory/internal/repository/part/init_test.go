@@ -11,7 +11,7 @@ func (s *RepositorySuite) TestInitWithDummyMainFlow() {
 	require.Empty(s.T(), s.repository.Count())
 
 	// Вызываем метод инициализации
-	err := s.repository.InitWithDummy()
+	err := s.repository.InitWithDummy(s.ctx)
 
 	// Проверяем результат
 	require.NoError(s.T(), err)
@@ -64,12 +64,12 @@ func (s *RepositorySuite) TestInitWithDummyMainFlow() {
 
 func (s *RepositorySuite) TestInitWithDummyMultipleCalls() {
 	// Первая инициализация
-	err1 := s.repository.InitWithDummy()
+	err1 := s.repository.InitWithDummy(s.ctx)
 	require.NoError(s.T(), err1)
 	initialCount := s.repository.Count()
 
 	// Вторая инициализация (должна перезаписать данные)
-	err2 := s.repository.InitWithDummy()
+	err2 := s.repository.InitWithDummy(s.ctx)
 	require.NoError(s.T(), err2)
 	secondCount := s.repository.Count()
 
@@ -85,7 +85,7 @@ func (s *RepositorySuite) TestInitWithDummyWithExistingData() {
 	require.True(s.T(), s.repository.Count() == 1)
 
 	// Вызываем метод инициализации
-	err := s.repository.InitWithDummy()
+	err := s.repository.InitWithDummy(s.ctx)
 
 	// Проверяем результат
 	require.NoError(s.T(), err)
@@ -102,7 +102,7 @@ func (s *RepositorySuite) TestInitWithDummyWithExistingData() {
 
 func (s *RepositorySuite) TestInitWithDummyGeneratesValidParts() {
 	// Вызываем метод инициализации
-	err := s.repository.InitWithDummy()
+	err := s.repository.InitWithDummy(s.ctx)
 	require.NoError(s.T(), err)
 	require.NotEmpty(s.T(), s.repository)
 
@@ -153,7 +153,7 @@ func (s *RepositorySuite) TestInitWithDummyGeneratesValidParts() {
 
 func (s *RepositorySuite) TestInitWithDummyPriceRange() {
 	// Вызываем метод инициализации
-	err := s.repository.InitWithDummy()
+	err := s.repository.InitWithDummy(s.ctx)
 	require.NoError(s.T(), err)
 	require.NotEmpty(s.T(), s.repository)
 
@@ -166,7 +166,7 @@ func (s *RepositorySuite) TestInitWithDummyPriceRange() {
 
 func (s *RepositorySuite) TestInitWithDummyStockQuantity() {
 	// Вызываем метод инициализации
-	err := s.repository.InitWithDummy()
+	err := s.repository.InitWithDummy(s.ctx)
 	require.NoError(s.T(), err)
 	require.NotEmpty(s.T(), s.repository)
 

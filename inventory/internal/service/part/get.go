@@ -7,5 +7,8 @@ import (
 )
 
 func (s *service) GetPart(ctx context.Context, uuid string) (*model.Part, error) {
-	return s.repository.GetPart(ctx, uuid)
+	timedCtx, cancel := context.WithTimeout(ctx, model.RequestTimeoutRead)
+	defer cancel()
+
+	return s.repository.GetPart(timedCtx, uuid)
 }

@@ -10,7 +10,7 @@ issue-845-fix: True
 packages:
   github.com/Mahno9/GoMicroservicesCourse/inventory/internal:
     config:
-      include-regex: ".*Repository"
+      include-regex: "(.*Repository|Mongo.*)"
   github.com/Mahno9/GoMicroservicesCourse/order/internal:
     config:
       include-regex: ".*(Repository|Client)"

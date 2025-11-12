@@ -1,27 +1,97 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
+
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 
 	partV1API "github.com/Mahno9/GoMicroservicesCourse/inventory/internal/api/inventory/v1"
 	partRepository "github.com/Mahno9/GoMicroservicesCourse/inventory/internal/repository/part"
 	partService "github.com/Mahno9/GoMicroservicesCourse/inventory/internal/service/part"
 	genInventoryV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/proto/inventory/v1"
+	"github.com/joho/godotenv"
 )
 
 const (
-	grpcPort = 50051
+	grpcPort         = 50051 // TODO: remove
+	initPartsTimeout = 5 * time.Second
+
+	envPathDefault      = ".env"
+	envPathEnvName      = "ENV_PATH"
+	databaseUriEnvName  = "INVENTORY_DB_URI"
+	databaseNameEnvName = "INVENTORY_DB_NAME"
 )
 
 func main() {
+	ctx := context.Background()
+
+	// Load .env variables
+	envPath := os.Getenv(envPathEnvName)
+	if envPath == "" {
+		envPath = envPathDefault
+	}
+	err := godotenv.Load(envPath)
+	if err != nil {
+		log.Printf("❗ Failed to load env file: %v\n", err)
+		return
+	}
+
+	// Inventory Repository
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(os.Getenv(databaseUriEnvName)))
+	if err != nil {
+		log.Printf("❗ failed to connect to database: %v\n", err)
+		return
+	}
+	defer func() {
+		if cerr := client.Disconnect(ctx); cerr != nil {
+			log.Printf("❗ failed to disconnect from database: %v\n", cerr)
+		}
+	}()
+
+	if err = client.Ping(ctx, nil); err != nil {
+		log.Printf("❗ failed to ping database: %v\n", err)
+		return
+	}
+
+	inventoryDb := client.Database(os.Getenv(databaseNameEnvName))
+	partRepo, err := partRepository.NewRepository(ctx, inventoryDb)
+	if err != nil {
+		log.Printf("❗ failed to create repository: %v\n", err)
+		return
+	}
+
+	// Inventory Service
+	service := partService.NewService(partRepo)
+
+	timedContext, cancel := context.WithTimeout(ctx, initPartsTimeout)
+	defer cancel()
+
+	err = service.InitWithDummy(timedContext) // init with dummy data
+	if err != nil {
+		log.Printf("❗ failed to init with dummy data: %v\n", err)
+		return
+	}
+
+	// Inventory API
+	serviceAPI := partV1API.NewAPI(service)
+
+	// gRPC service serving
+	grpcServer := grpc.NewServer()
+	genInventoryV1.RegisterInventoryServiceServer(grpcServer, serviceAPI)
+
+	reflection.Register(grpcServer)
+
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", grpcPort))
 	if err != nil {
 		log.Printf("❗ failed to listen: %v\n", err)
@@ -33,21 +103,6 @@ func main() {
 		}
 	}()
 
-	grpcServer := grpc.NewServer()
-
-	partRepo := partRepository.NewRepository()
-	service := partService.NewService(partRepo)
-	err = service.InitWithDummy() // init with dummy data
-	if err != nil {
-		log.Printf("❗ failed to init with dummy data: %v\n", err)
-		return
-	}
-
-	serviceAPI := partV1API.NewAPI(service)
-	genInventoryV1.RegisterInventoryServiceServer(grpcServer, serviceAPI)
-
-	reflection.Register(grpcServer)
-
 	go func() {
 		log.Printf("👂 gRPC server listening on port %d\n", grpcPort)
 		err = grpcServer.Serve(listener)
@@ -57,9 +112,11 @@ func main() {
 		}
 	}()
 
+	// Gracefull shutdown
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
+
 	log.Println("🟧 Shutting down gRPC server...")
 	grpcServer.GracefulStop()
 	log.Println("✅ gRPC server gracefully stopped")

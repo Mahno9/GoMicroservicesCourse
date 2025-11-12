@@ -4,7 +4,7 @@ import (
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/stretchr/testify/require"
 
-	domainModel "github.com/Mahno9/GoMicroservicesCourse/inventory/internal/model"
+	"github.com/Mahno9/GoMicroservicesCourse/inventory/internal/model"
 	repoModel "github.com/Mahno9/GoMicroservicesCourse/inventory/internal/repository/model"
 )
 
@@ -31,7 +31,7 @@ func (s *RepositorySuite) TestListPartsMainFlow() {
 	s.repository.Add(part3)
 
 	// Создаем фильтр - ищем части, которые соответствуют любому из UUID
-	filter := &domainModel.PartsFilter{
+	filter := &model.PartsFilter{
 		Uuids: []string{
 			part1.Uuid,
 			part2.Uuid,
@@ -65,7 +65,7 @@ func (s *RepositorySuite) TestListPartsEmptyFilter() {
 	s.repository.Add(part2)
 
 	// Создаем пустой фильтр
-	filter := &domainModel.PartsFilter{}
+	filter := &model.PartsFilter{}
 
 	// Вызываем метод
 	result, err := s.repository.ListParts(s.ctx, filter)
@@ -87,7 +87,7 @@ func (s *RepositorySuite) TestListPartsOnlyUuidsFilter() {
 	s.repository.Add(part3)
 
 	// Создаем фильтр только с UUID
-	filter := &domainModel.PartsFilter{
+	filter := &model.PartsFilter{
 		Uuids: []string{
 			part1.Uuid,
 			part3.Uuid,
@@ -128,7 +128,7 @@ func (s *RepositorySuite) TestListPartsOnlyTagsFilter() {
 	s.repository.Add(part3)
 
 	// Создаем фильтр только с тегами
-	filter := &domainModel.PartsFilter{
+	filter := &model.PartsFilter{
 		Tags: []string{
 			"primary",
 			"aerodynamic",
@@ -158,7 +158,7 @@ func (s *RepositorySuite) TestListPartsNoMatches() {
 	s.repository.Add(part1)
 
 	// Создаем фильтр, который не совпадает ни с одной частью
-	filter := &domainModel.PartsFilter{
+	filter := &model.PartsFilter{
 		Uuids: []string{
 			gofakeit.UUID(), // Случайный UUID, которого нет в репозитории
 		},
@@ -176,7 +176,7 @@ func (s *RepositorySuite) TestListPartsEmptyRepository() {
 	// Репозиторий пуст (не добавляем никаких частей)
 
 	// Создаем пустой фильтр
-	filter := &domainModel.PartsFilter{}
+	filter := &model.PartsFilter{}
 
 	// Вызываем метод
 	result, err := s.repository.ListParts(s.ctx, filter)
@@ -196,7 +196,7 @@ func (s *RepositorySuite) TestListPartsConcurrentAccess() {
 	s.repository.Add(part2)
 
 	// Создаем фильтр
-	filter := &domainModel.PartsFilter{}
+	filter := &model.PartsFilter{}
 
 	// Запускаем несколько горутин для проверки конкурентного доступа
 	done := make(chan bool, 10)

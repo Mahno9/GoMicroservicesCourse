@@ -31,16 +31,19 @@ import (
 )
 
 const (
-	inventoryAddress  = "localhost:50051"
-	paymentAddress    = "localhost:50052"
-	httpPort          = "8080"
 	readHeaderTimeout = 5 * time.Second
 	shutdownTimeout   = 10 * time.Second
 
-	envPathDefault       = ".env"
-	envPathEnvName       = "ENV_PATH"
-	databaseUriEnvName   = "ORDER_DB_URI"
-	migrationsDirEnvName = "ORDER_MIGRATIONS_DIR"
+	envPathDefault = ".env"
+	envPathEnvName = "ENV_PATH"
+
+	serviceHttpHostEnvName = "ORDER_SERVICE_URL"
+	serviceHttpPortEnvName = "ORDER_SERVICE_PORT"
+	databaseUriEnvName     = "ORDER_DB_URI"
+	migrationsDirEnvName   = "ORDER_MIGRATIONS_DIR"
+
+	inventoryAddressEnvName = "INVENTORY_SERVICE_ADDRESS"
+	paymentAddressEnvName   = "PAYMENT_SERVICE_ADDRESS"
 )
 
 func main() {
@@ -58,7 +61,7 @@ func main() {
 	}
 
 	// Inventory
-	inventoryConn, err := grpc.NewClient(inventoryAddress,
+	inventoryConn, err := grpc.NewClient(os.Getenv(inventoryAddressEnvName),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
@@ -80,7 +83,7 @@ func main() {
 	}
 
 	// Payment
-	paymentConn, err := grpc.NewClient(paymentAddress,
+	paymentConn, err := grpc.NewClient(os.Getenv(paymentAddressEnvName),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
@@ -145,13 +148,13 @@ func main() {
 	router.Mount("/", orderServer)
 
 	httpServer := &http.Server{
-		Addr:              net.JoinHostPort("localhost", httpPort),
+		Addr:              net.JoinHostPort(os.Getenv(serviceHttpHostEnvName), os.Getenv(serviceHttpPortEnvName)),
 		Handler:           router,
 		ReadHeaderTimeout: readHeaderTimeout,
 	}
 
 	go func() {
-		log.Printf("👂 HTTP-сервер запущен на порту %s\n", httpPort)
+		log.Printf("👂 HTTP-сервер запущен на порту %s\n", os.Getenv(serviceHttpPortEnvName))
 		err := httpServer.ListenAndServe()
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Printf("❗ Ошибка при запуске HTTP-сервера: %v\n", err)

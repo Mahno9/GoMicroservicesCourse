@@ -7,5 +7,8 @@ import (
 )
 
 func (s *service) ListParts(ctx context.Context, filter *model.PartsFilter) ([]*model.Part, error) {
-	return s.repository.ListParts(ctx, filter)
+	timedCtx, cancel := context.WithTimeout(ctx, model.RequestTimeoutRead)
+	defer cancel()
+
+	return s.repository.ListParts(timedCtx, filter)
 }

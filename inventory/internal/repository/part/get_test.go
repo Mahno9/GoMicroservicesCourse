@@ -7,7 +7,7 @@ import (
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/require"
 
-	domainModel "github.com/Mahno9/GoMicroservicesCourse/inventory/internal/model"
+	"github.com/Mahno9/GoMicroservicesCourse/inventory/internal/model"
 )
 
 func (s *RepositorySuite) TestGetPartMainFlow() {
@@ -28,7 +28,7 @@ func (s *RepositorySuite) TestGetPartMainFlow() {
 	require.Equal(s.T(), testPart.Description, result.Description)
 	require.Equal(s.T(), testPart.Price, result.Price)
 	require.Equal(s.T(), testPart.StockQuantity, result.StockQuantity)
-	require.Equal(s.T(), domainModel.Category(testPart.Category), result.Category)
+	require.Equal(s.T(), model.Category(testPart.Category), result.Category)
 	require.Equal(s.T(), testPart.Tags, result.Tags)
 	require.Equal(s.T(), testPart.Metadata, result.Metadata)
 	require.NotNil(s.T(), result.Dimensions)
@@ -51,7 +51,7 @@ func (s *RepositorySuite) TestGetPartNotFound() {
 
 	// Проверяем результат
 	require.Error(s.T(), err)
-	require.ErrorIs(s.T(), err, domainModel.ErrPartNotFound)
+	require.ErrorIs(s.T(), err, model.ErrPartNotFound)
 	require.Nil(s.T(), result)
 }
 
@@ -65,7 +65,7 @@ func (s *RepositorySuite) TestGetPartEmptyUuid() {
 
 	// Проверяем результат
 	require.Error(s.T(), err)
-	require.ErrorIs(s.T(), err, domainModel.ErrPartNotFound)
+	require.ErrorIs(s.T(), err, model.ErrPartNotFound)
 	require.Nil(s.T(), result)
 }
 
@@ -85,7 +85,7 @@ func (s *RepositorySuite) TestGetPartMinimalData() {
 	require.Equal(s.T(), testPart.Description, result.Description)
 	require.Equal(s.T(), testPart.Price, result.Price)
 	require.Equal(s.T(), testPart.StockQuantity, result.StockQuantity)
-	require.Equal(s.T(), domainModel.Category(testPart.Category), result.Category)
+	require.Equal(s.T(), model.Category(testPart.Category), result.Category)
 	require.Equal(s.T(), testPart.Tags, result.Tags)
 	require.Equal(s.T(), testPart.Metadata, result.Metadata)
 	require.Nil(s.T(), result.Dimensions)
