@@ -1,9 +1,10 @@
 package converter
 
 import (
+	"go.mongodb.org/mongo-driver/bson"
+
 	"github.com/Mahno9/GoMicroservicesCourse/inventory/internal/model"
 	repoModel "github.com/Mahno9/GoMicroservicesCourse/inventory/internal/repository/model"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 // nolint:dupl
@@ -93,7 +94,6 @@ func RepositoryToModelPart(repoPart *repoModel.Part) *model.Part {
 // nolint:dupl
 // ModelToRepositoryFilter конвертирует доменный фильтр в фильтр репозитория
 func ModelToRepositoryFilter(filter *model.PartsFilter) bson.M {
-
 	if filter == nil {
 		return nil
 	}

@@ -14,14 +14,28 @@ import (
 	paymentV1API "github.com/Mahno9/GoMicroservicesCourse/payment/internal/api/payment/v1"
 	paymentService "github.com/Mahno9/GoMicroservicesCourse/payment/internal/service/payment"
 	genPaymentV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/proto/payment/v1"
+	"github.com/joho/godotenv"
 )
 
 const (
-	grpcPort = 50052
+	envPathDefault  = ".env"
+	envPathEnvName  = "ENV_PATH"
+	grpcPortEnvName = "PAYMENT_SERVICE_PORT"
 )
 
 func main() {
-	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", grpcPort))
+	// Load .env variables
+	envPath := os.Getenv(envPathEnvName)
+	if envPath == "" {
+		envPath = envPathDefault
+	}
+	err := godotenv.Load(envPath)
+	if err != nil {
+		log.Printf("❗ Failed to load env file: %v\n", err)
+		return
+	}
+
+	listener, err := net.Listen("tcp", fmt.Sprintf(":%s", os.Getenv(grpcPortEnvName)))
 	if err != nil {
 		log.Printf("❗ failed to listen: %v\n", err)
 		return
@@ -41,7 +55,7 @@ func main() {
 	reflection.Register(grpcServer)
 
 	go func() {
-		log.Printf("👂 gRPC server listening on port %d\n", grpcPort)
+		log.Printf("👂 gRPC server listening on port %s\n", os.Getenv(grpcPortEnvName))
 		err = grpcServer.Serve(listener)
 		if err != nil {
 			log.Printf("❗ failed to serve: %v\n", err)

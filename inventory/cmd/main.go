@@ -10,25 +10,25 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/joho/godotenv"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-
 	partV1API "github.com/Mahno9/GoMicroservicesCourse/inventory/internal/api/inventory/v1"
+	"github.com/Mahno9/GoMicroservicesCourse/inventory/internal/repository"
 	partRepository "github.com/Mahno9/GoMicroservicesCourse/inventory/internal/repository/part"
 	partService "github.com/Mahno9/GoMicroservicesCourse/inventory/internal/service/part"
 	genInventoryV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/proto/inventory/v1"
-	"github.com/joho/godotenv"
 )
 
 const (
-	grpcPort         = 50051 // TODO: remove
 	initPartsTimeout = 5 * time.Second
 
 	envPathDefault      = ".env"
 	envPathEnvName      = "ENV_PATH"
+	grpcPortEnvName     = "INVENTORY_SERVICE_PORT"
 	databaseUriEnvName  = "INVENTORY_DB_URI"
 	databaseNameEnvName = "INVENTORY_DB_NAME"
 )
@@ -65,7 +65,8 @@ func main() {
 	}
 
 	inventoryDb := client.Database(os.Getenv(databaseNameEnvName))
-	partRepo, err := partRepository.NewRepository(ctx, inventoryDb)
+	wrappedDb := &repository.MongoDatabaseAdapter{Database: inventoryDb}
+	partRepo, err := partRepository.NewRepository(ctx, wrappedDb)
 	if err != nil {
 		log.Printf("❗ failed to create repository: %v\n", err)
 		return
@@ -92,7 +93,7 @@ func main() {
 
 	reflection.Register(grpcServer)
 
-	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", grpcPort))
+	listener, err := net.Listen("tcp", fmt.Sprintf(":%s", os.Getenv(grpcPortEnvName)))
 	if err != nil {
 		log.Printf("❗ failed to listen: %v\n", err)
 		return
@@ -104,7 +105,7 @@ func main() {
 	}()
 
 	go func() {
-		log.Printf("👂 gRPC server listening on port %d\n", grpcPort)
+		log.Printf("👂 gRPC server listening on port %s\n", os.Getenv(grpcPortEnvName))
 		err = grpcServer.Serve(listener)
 		if err != nil {
 			log.Printf("❗ failed to serve: %v\n", err)

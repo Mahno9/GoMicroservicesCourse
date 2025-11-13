@@ -4,11 +4,12 @@ import (
 	"context"
 	"errors"
 
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+
 	"github.com/Mahno9/GoMicroservicesCourse/inventory/internal/model"
 	"github.com/Mahno9/GoMicroservicesCourse/inventory/internal/repository/converter"
 	repoModel "github.com/Mahno9/GoMicroservicesCourse/inventory/internal/repository/model"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 func (r *repository) GetPart(ctx context.Context, partUuid string) (*model.Part, error) {

@@ -91,7 +91,7 @@ func (s *ServiceSuite) TestListPartsMainFlow() {
 		}
 	)
 
-	s.repository.On("ListParts", s.ctx, mock.MatchedBy(func(f *model.PartsFilter) bool {
+	s.repository.On("ListParts", mock.Anything, mock.MatchedBy(func(f *model.PartsFilter) bool {
 		return len(f.Uuids) == 3 &&
 			len(f.Names) == 2 &&
 			len(f.Categories) == 2 &&
@@ -116,7 +116,7 @@ func (s *ServiceSuite) TestListPartsRepositoryError() {
 		expectedError = model.ErrPartNotFound
 	)
 
-	s.repository.On("ListParts", s.ctx, mock.AnythingOfType("*model.PartsFilter")).Return(nil, expectedError)
+	s.repository.On("ListParts", mock.Anything, mock.AnythingOfType("*model.PartsFilter")).Return(nil, expectedError)
 
 	result, err := s.service.ListParts(s.ctx, filter)
 
@@ -131,7 +131,7 @@ func (s *ServiceSuite) TestListPartsEmptyFilter() {
 		expectedParts = []*model.Part{}
 	)
 
-	s.repository.On("ListParts", s.ctx, mock.MatchedBy(func(f *model.PartsFilter) bool {
+	s.repository.On("ListParts", mock.Anything, mock.MatchedBy(func(f *model.PartsFilter) bool {
 		return len(f.Uuids) == 0 &&
 			len(f.Names) == 0 &&
 			len(f.Categories) == 0 &&
@@ -169,7 +169,7 @@ func (s *ServiceSuite) TestListPartsWithOnlyUuidsFilter() {
 		}
 	)
 
-	s.repository.On("ListParts", s.ctx, mock.MatchedBy(func(f *model.PartsFilter) bool {
+	s.repository.On("ListParts", mock.Anything, mock.MatchedBy(func(f *model.PartsFilter) bool {
 		return len(f.Uuids) == 2 && len(f.Names) == 0 && len(f.Categories) == 0
 	})).Return(expectedParts, nil)
 

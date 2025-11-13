@@ -4,11 +4,12 @@ import (
 	"context"
 	"time"
 
-	model "github.com/Mahno9/GoMicroservicesCourse/inventory/internal/model"
-	def "github.com/Mahno9/GoMicroservicesCourse/inventory/internal/repository"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+
+	model "github.com/Mahno9/GoMicroservicesCourse/inventory/internal/model"
+	def "github.com/Mahno9/GoMicroservicesCourse/inventory/internal/repository"
 )
 
 const (

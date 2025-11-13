@@ -15,10 +15,6 @@ import (
 func (r *repository) InitWithDummy(ctx context.Context) error {
 	parts := generateParts()
 
-	// for _, part := range parts {
-	// 	r.Add(part)
-	// }
-
 	interfaceParts := make([]interface{}, len(parts))
 	for i, part := range parts {
 		interfaceParts[i] = part

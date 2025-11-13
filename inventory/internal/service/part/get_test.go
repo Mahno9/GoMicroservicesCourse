@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/brianvoe/gofakeit/v7"
+	"github.com/stretchr/testify/mock"
 
 	"github.com/Mahno9/GoMicroservicesCourse/inventory/internal/model"
 )
@@ -51,7 +52,7 @@ func (s *ServiceSuite) TestGetPartMainFlow() {
 		}
 	)
 
-	s.repository.On("GetPart", s.ctx, partUuid).Return(expectedPart, nil)
+	s.repository.On("GetPart", mock.Anything, partUuid).Return(expectedPart, nil)
 
 	result, err := s.service.GetPart(s.ctx, partUuid)
 
@@ -65,7 +66,7 @@ func (s *ServiceSuite) TestGetPartRepositoryError() {
 		expectedError = model.ErrPartNotFound
 	)
 
-	s.repository.On("GetPart", s.ctx, partUuid).Return(nil, expectedError)
+	s.repository.On("GetPart", mock.Anything, partUuid).Return(nil, expectedError)
 
 	result, err := s.service.GetPart(s.ctx, partUuid)
 
@@ -79,7 +80,7 @@ func (s *ServiceSuite) TestGetPartEmptyUuid() {
 		expectedError = model.ErrPartNotFound
 	)
 
-	s.repository.On("GetPart", s.ctx, partUuid).Return(nil, expectedError)
+	s.repository.On("GetPart", mock.Anything, partUuid).Return(nil, expectedError)
 
 	result, err := s.service.GetPart(s.ctx, partUuid)
 
@@ -103,7 +104,7 @@ func (s *ServiceSuite) TestGetPartWithMinimalData() {
 		}
 	)
 
-	s.repository.On("GetPart", s.ctx, partUuid).Return(expectedPart, nil)
+	s.repository.On("GetPart", mock.Anything, partUuid).Return(expectedPart, nil)
 
 	result, err := s.service.GetPart(s.ctx, partUuid)
 
