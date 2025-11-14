@@ -3,10 +3,12 @@ package order
 import (
 	"context"
 
+	"github.com/google/uuid"
+
 	"github.com/Mahno9/GoMicroservicesCourse/order/internal/model"
 )
 
-func (s *service) OrderCancel(ctx context.Context, orderUuid string) error {
+func (s *service) OrderCancel(ctx context.Context, orderUuid uuid.UUID) error {
 	reqGetCtx, cancelGet := context.WithTimeout(ctx, model.RequestTimeoutRead)
 	defer cancelGet()
 

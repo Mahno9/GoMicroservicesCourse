@@ -19,6 +19,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
+	apiMiddleware "github.com/Mahno9/GoMicroservicesCourse/order/internal/api/middleware"
 	orderApiHandlerV1 "github.com/Mahno9/GoMicroservicesCourse/order/internal/api/order/v1"
 	inventoryClientV1 "github.com/Mahno9/GoMicroservicesCourse/order/internal/client/grpc/inventory/v1"
 	paymentClientV1 "github.com/Mahno9/GoMicroservicesCourse/order/internal/client/grpc/payment/v1"
@@ -145,6 +146,7 @@ func main() {
 	router.Use(middleware.Logger)
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.Timeout(10 * time.Second))
+	router.Use(apiMiddleware.UUIDValidationMiddleware)
 	router.Mount("/", orderServer)
 
 	httpServer := &http.Server{

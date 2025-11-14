@@ -1,6 +1,7 @@
 package converter
 
 import (
+	"github.com/google/uuid"
 	"github.com/samber/lo"
 
 	"github.com/Mahno9/GoMicroservicesCourse/order/internal/model"
@@ -12,20 +13,23 @@ func ApiToModelOrderInfo(apiOrder *genOrderV1.CreateOrderReq) model.CreateOrderD
 		return model.CreateOrderData{}
 	}
 
-	partUuids := make([]string, len(apiOrder.PartUuids))
+	partUuids := make([]uuid.UUID, len(apiOrder.PartUuids))
 	copy(partUuids, apiOrder.PartUuids)
 
 	return model.CreateOrderData{
-		UserUuid:  string(apiOrder.UserUUID),
+		UserUuid:  uuid.UUID(apiOrder.UserUUID),
 		PartUuids: partUuids,
 	}
 }
 
 func ModelToApiGetOrder(modelOrder *model.Order) *genOrderV1.GetOrderOK {
+	partUuids := make([]uuid.UUID, len(modelOrder.PartUuids))
+	copy(partUuids, modelOrder.PartUuids)
+
 	return &genOrderV1.GetOrderOK{
 		OrderUUID:       genOrderV1.OrderUUID(modelOrder.OrderUuid),
 		UserUUID:        genOrderV1.UserUUID(modelOrder.UserUuid),
-		PartUuids:       modelOrder.PartUuids,
+		PartUuids:       partUuids,
 		TotalPrice:      genOrderV1.TotalPrice(modelOrder.TotalPrice),
 		TransactionUUID: genOrderV1.TransactionUUID(lo.FromPtr(modelOrder.TransactionUuid)),
 		PaymentMethod:   ModelToApiPaymentMethod(modelOrder.PaymentMethod),

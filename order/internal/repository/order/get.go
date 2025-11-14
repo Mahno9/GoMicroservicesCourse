@@ -5,6 +5,7 @@ import (
 	"log"
 
 	sq "github.com/Masterminds/squirrel"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 
 	"github.com/Mahno9/GoMicroservicesCourse/order/internal/model"
@@ -12,10 +13,10 @@ import (
 	repoModel "github.com/Mahno9/GoMicroservicesCourse/order/internal/repository/model"
 )
 
-func (r *repository) Get(ctx context.Context, orderUuid string) (*model.Order, error) {
+func (r *repository) Get(ctx context.Context, orderUuid uuid.UUID) (*model.Order, error) {
 	builderSelect := sq.Select("*").
 		From("orders").
-		Where(sq.Eq{"order_uuid": orderUuid}).
+		Where(sq.Eq{"order_uuid": orderUuid.String()}).
 		PlaceholderFormat(sq.Dollar)
 
 	query, args, err := builderSelect.ToSql()

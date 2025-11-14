@@ -8,13 +8,13 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/joho/godotenv"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
 	paymentV1API "github.com/Mahno9/GoMicroservicesCourse/payment/internal/api/payment/v1"
 	paymentService "github.com/Mahno9/GoMicroservicesCourse/payment/internal/service/payment"
 	genPaymentV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/proto/payment/v1"
-	"github.com/joho/godotenv"
 )
 
 const (

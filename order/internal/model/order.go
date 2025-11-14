@@ -1,22 +1,26 @@
 package model
 
+import (
+	"github.com/google/uuid"
+)
+
 type CreateOrderData struct {
-	UserUuid  string
-	PartUuids []string
+	UserUuid  uuid.UUID
+	PartUuids []uuid.UUID
 }
 
 type PayOrderData struct {
-	OrderUuid     string
-	UserUuid      string
+	OrderUuid     uuid.UUID
+	UserUuid      uuid.UUID
 	PaymentMethod int32
 }
 
 type Order struct {
-	OrderUuid       string
-	UserUuid        string
-	PartUuids       []string
+	OrderUuid       uuid.UUID
+	UserUuid        uuid.UUID
+	PartUuids       []uuid.UUID
 	TotalPrice      float64
-	TransactionUuid *string
+	TransactionUuid *uuid.UUID
 	PaymentMethod   int32
 	Status          OrderStatus
 }

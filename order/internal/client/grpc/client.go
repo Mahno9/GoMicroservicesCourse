@@ -3,6 +3,8 @@ package grpc
 import (
 	"context"
 
+	"github.com/google/uuid"
+
 	"github.com/Mahno9/GoMicroservicesCourse/order/internal/model"
 )
 
@@ -11,5 +13,5 @@ type InventoryClient interface {
 }
 
 type PaymentClient interface {
-	PayOrder(ctx context.Context, paymentData model.PayOrderData) (string, error)
+	PayOrder(ctx context.Context, paymentData model.PayOrderData) (uuid.UUID, error)
 }

@@ -1,9 +1,13 @@
 package model
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type Part struct {
-	Uuid          string
+	Uuid          uuid.UUID
 	Name          string
 	Description   string
 	Price         float64
@@ -31,7 +35,7 @@ type Manufacturer struct {
 }
 
 type PartsFilter struct {
-	Uuids                 []string
+	Uuids                 []uuid.UUID
 	Names                 []string
 	Categories            []int32
 	ManufacturerCountries []string

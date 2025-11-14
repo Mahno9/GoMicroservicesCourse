@@ -1,6 +1,8 @@
 package converter
 
 import (
+	"github.com/google/uuid"
+
 	"github.com/Mahno9/GoMicroservicesCourse/order/internal/model"
 	repoModel "github.com/Mahno9/GoMicroservicesCourse/order/internal/repository/model"
 )
@@ -11,12 +13,23 @@ func ModelToRepositoryOrder(order *model.Order) *repoModel.Order {
 		return nil
 	}
 
+	var transactionUuidStr *string
+	if order.TransactionUuid != nil {
+		str := order.TransactionUuid.String()
+		transactionUuidStr = &str
+	}
+
+	partUuidsStr := make([]string, len(order.PartUuids))
+	for i, partUuid := range order.PartUuids {
+		partUuidsStr[i] = partUuid.String()
+	}
+
 	return &repoModel.Order{
-		OrderUuid:       order.OrderUuid,
-		UserUuid:        order.UserUuid,
-		PartUuids:       order.PartUuids,
+		OrderUuid:       order.OrderUuid.String(),
+		UserUuid:        order.UserUuid.String(),
+		PartUuids:       partUuidsStr,
 		TotalPrice:      order.TotalPrice,
-		TransactionUuid: order.TransactionUuid,
+		TransactionUuid: transactionUuidStr,
 		PaymentMethod:   modelToRepoPaymentMethod(order.PaymentMethod),
 		Status:          modelToRepoStatus(order.Status),
 	}
@@ -28,12 +41,38 @@ func RepositoryToModelOrder(order *repoModel.Order) *model.Order {
 		return nil
 	}
 
+	orderUuid, err := uuid.Parse(order.OrderUuid)
+	if err != nil {
+		return nil
+	}
+	userUuid, err := uuid.Parse(order.UserUuid)
+	if err != nil {
+		return nil
+	}
+
+	var transactionUuid *uuid.UUID
+	if order.TransactionUuid != nil {
+		parsed, err := uuid.Parse(*order.TransactionUuid)
+		if err == nil {
+			transactionUuid = &parsed
+		}
+	}
+
+	partUuids := make([]uuid.UUID, len(order.PartUuids))
+	for i, partUuidStr := range order.PartUuids {
+		parsed, err := uuid.Parse(partUuidStr)
+		if err != nil {
+			continue
+		}
+		partUuids[i] = parsed
+	}
+
 	return &model.Order{
-		OrderUuid:       order.OrderUuid,
-		UserUuid:        order.UserUuid,
-		PartUuids:       order.PartUuids,
+		OrderUuid:       orderUuid,
+		UserUuid:        userUuid,
+		PartUuids:       partUuids,
 		TotalPrice:      order.TotalPrice,
-		TransactionUuid: order.TransactionUuid,
+		TransactionUuid: transactionUuid,
 		PaymentMethod:   repoToModelPaymentMethod(order.PaymentMethod),
 		Status:          repoToModelStatus(order.Status),
 	}
