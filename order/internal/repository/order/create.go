@@ -3,6 +3,7 @@ package order
 import (
 	"context"
 	"log"
+	"strings"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v5"
@@ -15,11 +16,13 @@ import (
 func (r *repository) Create(ctx context.Context, order *model.Order) (*model.Order, error) {
 	newOrder := converter.ModelToRepositoryOrder(order)
 
+	assignColumns := []string{"user_uuid", "part_uuids", "total_price", "payment_method", "order_status"}
+
 	builderInsert := sq.Insert("orders").
 		PlaceholderFormat(sq.Dollar).
-		Columns("user_uuid", "part_uuids", "total_price", "payment_method", "order_status").
+		Columns(assignColumns...).
 		Values(newOrder.UserUuid, newOrder.PartUuids, newOrder.TotalPrice, newOrder.PaymentMethod, newOrder.Status).
-		Suffix("RETURNING *")
+		Suffix("RETURNING " + strings.Join(assignColumns, ", "))
 
 	query, args, err := builderInsert.ToSql()
 	if err != nil {

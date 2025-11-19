@@ -28,26 +28,26 @@ func (s *RepositorySuite) TestListPartsMainFlow() {
 	cursor := mocks.NewMongoCursor(s.T())
 	cursor.On("All", s.ctx, mock.Anything).Run(func(args mock.Arguments) {
 		// Получаем указатель на слайс и заполняем его данными
-		parts := args.Get(1).(*[]*model.Part)
-		*parts = []*model.Part{
+		parts := args.Get(1).(*[]*repoModel.Part)
+		*parts = []*repoModel.Part{
 			{
 				Uuid:          part1.Uuid,
 				Name:          part1.Name,
 				Description:   part1.Description,
 				Price:         part1.Price,
 				StockQuantity: part1.StockQuantity,
-				Category:      model.Category(part1.Category),
+				Category:      repoModel.Category(part1.Category),
 				Tags:          part1.Tags,
 				Metadata:      part1.Metadata,
 				CreatedAt:     part1.CreatedAt,
 				UpdatedAt:     part1.UpdatedAt,
-				Dimensions: &model.Dimensions{
+				Dimensions: &repoModel.Dimensions{
 					Length: part1.Dimensions.Length,
 					Width:  part1.Dimensions.Width,
 					Height: part1.Dimensions.Height,
 					Weight: part1.Dimensions.Weight,
 				},
-				Manufacturer: &model.Manufacturer{
+				Manufacturer: &repoModel.Manufacturer{
 					Name:    part1.Manufacturer.Name,
 					Country: part1.Manufacturer.Country,
 					Website: part1.Manufacturer.Website,
@@ -59,18 +59,18 @@ func (s *RepositorySuite) TestListPartsMainFlow() {
 				Description:   part2.Description,
 				Price:         part2.Price,
 				StockQuantity: part2.StockQuantity,
-				Category:      model.Category(part2.Category),
+				Category:      repoModel.Category(part2.Category),
 				Tags:          part2.Tags,
 				Metadata:      part2.Metadata,
 				CreatedAt:     part2.CreatedAt,
 				UpdatedAt:     part2.UpdatedAt,
-				Dimensions: &model.Dimensions{
+				Dimensions: &repoModel.Dimensions{
 					Length: part2.Dimensions.Length,
 					Width:  part2.Dimensions.Width,
 					Height: part2.Dimensions.Height,
 					Weight: part2.Dimensions.Weight,
 				},
-				Manufacturer: &model.Manufacturer{
+				Manufacturer: &repoModel.Manufacturer{
 					Name:    part2.Manufacturer.Name,
 					Country: part2.Manufacturer.Country,
 					Website: part2.Manufacturer.Website,
@@ -128,15 +128,15 @@ func (s *RepositorySuite) TestListPartsEmptyFilter() {
 	// Создаем мок для курсора
 	cursor := mocks.NewMongoCursor(s.T())
 	cursor.On("All", s.ctx, mock.Anything).Run(func(args mock.Arguments) {
-		parts := args.Get(1).(*[]*model.Part)
-		*parts = []*model.Part{
+		parts := args.Get(1).(*[]*repoModel.Part)
+		*parts = []*repoModel.Part{
 			{
 				Uuid:          part1.Uuid,
 				Name:          part1.Name,
 				Description:   part1.Description,
 				Price:         part1.Price,
 				StockQuantity: part1.StockQuantity,
-				Category:      model.Category(part1.Category),
+				Category:      repoModel.Category(part1.Category),
 				Tags:          part1.Tags,
 				Metadata:      part1.Metadata,
 				CreatedAt:     part1.CreatedAt,
@@ -148,7 +148,7 @@ func (s *RepositorySuite) TestListPartsEmptyFilter() {
 				Description:   part2.Description,
 				Price:         part2.Price,
 				StockQuantity: part2.StockQuantity,
-				Category:      model.Category(part2.Category),
+				Category:      repoModel.Category(part2.Category),
 				Tags:          part2.Tags,
 				Metadata:      part2.Metadata,
 				CreatedAt:     part2.CreatedAt,
@@ -181,15 +181,15 @@ func (s *RepositorySuite) TestListPartsOnlyUuidsFilter() {
 	// Создаем мок для курсора
 	cursor := mocks.NewMongoCursor(s.T())
 	cursor.On("All", s.ctx, mock.Anything).Run(func(args mock.Arguments) {
-		parts := args.Get(1).(*[]*model.Part)
-		*parts = []*model.Part{
+		parts := args.Get(1).(*[]*repoModel.Part)
+		*parts = []*repoModel.Part{
 			{
 				Uuid:          part1.Uuid,
 				Name:          part1.Name,
 				Description:   part1.Description,
 				Price:         part1.Price,
 				StockQuantity: part1.StockQuantity,
-				Category:      model.Category(part1.Category),
+				Category:      repoModel.Category(part1.Category),
 				Tags:          part1.Tags,
 				Metadata:      part1.Metadata,
 				CreatedAt:     part1.CreatedAt,
@@ -201,7 +201,7 @@ func (s *RepositorySuite) TestListPartsOnlyUuidsFilter() {
 				Description:   part3.Description,
 				Price:         part3.Price,
 				StockQuantity: part3.StockQuantity,
-				Category:      model.Category(part3.Category),
+				Category:      repoModel.Category(part3.Category),
 				Tags:          part3.Tags,
 				Metadata:      part3.Metadata,
 				CreatedAt:     part3.CreatedAt,
@@ -262,15 +262,15 @@ func (s *RepositorySuite) TestListPartsOnlyTagsFilter() {
 	// Создаем мок для курсора
 	cursor := mocks.NewMongoCursor(s.T())
 	cursor.On("All", s.ctx, mock.Anything).Run(func(args mock.Arguments) {
-		parts := args.Get(1).(*[]*model.Part)
-		*parts = []*model.Part{
+		parts := args.Get(1).(*[]*repoModel.Part)
+		*parts = []*repoModel.Part{
 			{
 				Uuid:          part1.Uuid,
 				Name:          part1.Name,
 				Description:   part1.Description,
 				Price:         part1.Price,
 				StockQuantity: part1.StockQuantity,
-				Category:      model.Category(part1.Category),
+				Category:      repoModel.Category(part1.Category),
 				Tags:          part1.Tags,
 				Metadata:      part1.Metadata,
 				CreatedAt:     part1.CreatedAt,
@@ -282,7 +282,7 @@ func (s *RepositorySuite) TestListPartsOnlyTagsFilter() {
 				Description:   part3.Description,
 				Price:         part3.Price,
 				StockQuantity: part3.StockQuantity,
-				Category:      model.Category(part3.Category),
+				Category:      repoModel.Category(part3.Category),
 				Tags:          part3.Tags,
 				Metadata:      part3.Metadata,
 				CreatedAt:     part3.CreatedAt,
@@ -370,8 +370,8 @@ func (s *RepositorySuite) TestListPartsEmptyRepository() {
 	// Настраиваем мок для Find метода, который возвращает пустой курсор
 	cursor := mocks.NewMongoCursor(s.T())
 	cursor.On("All", s.ctx, mock.Anything).Run(func(args mock.Arguments) {
-		parts := args.Get(1).(*[]*model.Part)
-		*parts = []*model.Part{} // Пустой слайс
+		parts := args.Get(1).(*[]*repoModel.Part)
+		*parts = []*repoModel.Part{} // Пустой слайс
 	}).Return(nil)
 
 	cursor.On("Close", s.ctx).Return(nil)
@@ -398,15 +398,15 @@ func (s *RepositorySuite) TestListPartsConcurrentAccess() {
 	// Создаем мок для курсора
 	cursor := mocks.NewMongoCursor(s.T())
 	cursor.On("All", s.ctx, mock.Anything).Run(func(args mock.Arguments) {
-		parts := args.Get(1).(*[]*model.Part)
-		*parts = []*model.Part{
+		parts := args.Get(1).(*[]*repoModel.Part)
+		*parts = []*repoModel.Part{
 			{
 				Uuid:          part1.Uuid,
 				Name:          part1.Name,
 				Description:   part1.Description,
 				Price:         part1.Price,
 				StockQuantity: part1.StockQuantity,
-				Category:      model.Category(part1.Category),
+				Category:      repoModel.Category(part1.Category),
 				Tags:          part1.Tags,
 				Metadata:      part1.Metadata,
 				CreatedAt:     part1.CreatedAt,
@@ -418,7 +418,7 @@ func (s *RepositorySuite) TestListPartsConcurrentAccess() {
 				Description:   part2.Description,
 				Price:         part2.Price,
 				StockQuantity: part2.StockQuantity,
-				Category:      model.Category(part2.Category),
+				Category:      repoModel.Category(part2.Category),
 				Tags:          part2.Tags,
 				Metadata:      part2.Metadata,
 				CreatedAt:     part2.CreatedAt,

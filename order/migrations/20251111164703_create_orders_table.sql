@@ -5,22 +5,8 @@ CREATE TABLE orders (
     part_uuids UUID [] NOT NULL,
     total_price float8 NOT NULL,
     transaction_uuid UUID,
-    payment_method TEXT CHECK (
-        payment_method IN (
-            'CARD',
-            'SBP',
-            'CREDIT_CARD',
-            'INVESTOR_MONEY',
-            'UNKNOWN'
-        )
-    ),
-    order_status TEXT CHECK (
-        order_status IN (
-            'PAID',
-            'CANCELLED',
-            'PENDING_PAYMENT'
-        )
-    )
+    payment_method TEXT,
+    order_status TEXT CHECK
 );
 
 -- +goose Down

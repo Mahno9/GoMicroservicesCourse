@@ -20,10 +20,7 @@ func InventoryToModelParts(inventoryParts []*genInventoryV1.Part) ([]*model.Part
 }
 
 func inventoryToModelPart(inventoryPart *genInventoryV1.Part) *model.Part {
-	partUuid, err := uuid.Parse(inventoryPart.Uuid)
-	if err != nil {
-		log.Printf("Failed to parse UUID %s: %v", inventoryPart.Uuid, err)
-	}
+	partUuid := uuid.MustParse(inventoryPart.Uuid)
 
 	result := &model.Part{
 		Uuid:          partUuid,

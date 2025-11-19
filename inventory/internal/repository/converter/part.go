@@ -91,9 +91,17 @@ func RepositoryToModelPart(repoPart *repoModel.Part) *model.Part {
 	return domainPart
 }
 
+func RepositoryToModelParts(repoParts []*repoModel.Part) []*model.Part {
+	domainParts := make([]*model.Part, len(repoParts))
+	for i, repoPart := range repoParts {
+		domainParts[i] = RepositoryToModelPart(repoPart)
+	}
+	return domainParts
+}
+
 // nolint:dupl
-// ModelToRepositoryFilter конвертирует доменный фильтр в фильтр репозитория
-func ModelToRepositoryFilter(filter *model.PartsFilter) bson.M {
+// ModelToMongoFilter конвертирует доменный фильтр в фильтр MongoDB
+func ModelToMongoFilter(filter *model.PartsFilter) bson.M {
 	if filter == nil {
 		return nil
 	}

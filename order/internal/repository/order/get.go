@@ -14,7 +14,7 @@ import (
 )
 
 func (r *repository) Get(ctx context.Context, orderUuid uuid.UUID) (*model.Order, error) {
-	builderSelect := sq.Select("*").
+	builderSelect := sq.Select("order_uuid", "user_uuid", "part_uuids", "total_price", "transaction_uuid", "payment_method", "order_status").
 		From("orders").
 		Where(sq.Eq{"order_uuid": orderUuid.String()}).
 		PlaceholderFormat(sq.Dollar)
