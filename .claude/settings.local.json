@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(go build:*)",
+      "Bash(go test:*)",
+      "Bash(find:*)",
+      "Bash(task mockery:gen:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

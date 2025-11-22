@@ -3,6 +3,8 @@ package converter
 import (
 	"log"
 
+	"github.com/google/uuid"
+
 	"github.com/Mahno9/GoMicroservicesCourse/order/internal/model"
 	genInventoryV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/proto/inventory/v1"
 	genPaymentV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/proto/payment/v1"
@@ -18,8 +20,10 @@ func InventoryToModelParts(inventoryParts []*genInventoryV1.Part) ([]*model.Part
 }
 
 func inventoryToModelPart(inventoryPart *genInventoryV1.Part) *model.Part {
+	partUuid := uuid.MustParse(inventoryPart.Uuid)
+
 	result := &model.Part{
-		Uuid:          inventoryPart.Uuid,
+		Uuid:          partUuid,
 		Name:          inventoryPart.Name,
 		Description:   inventoryPart.Description,
 		Price:         inventoryPart.Price,
@@ -83,7 +87,9 @@ func ModelToInventoryPartsFilter(modelFilter *model.PartsFilter) *genInventoryV1
 
 	result := &genInventoryV1.PartsFilter{}
 
-	result.Uuids = append(result.Uuids, modelFilter.Uuids...)
+	for _, partUuid := range modelFilter.Uuids {
+		result.Uuids = append(result.Uuids, partUuid.String())
+	}
 	result.Names = append(result.Names, modelFilter.Names...)
 	for _, category := range modelFilter.Categories {
 		result.Categories = append(result.Categories, genInventoryV1.Category(category))

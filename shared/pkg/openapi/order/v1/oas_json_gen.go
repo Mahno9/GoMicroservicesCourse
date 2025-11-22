@@ -8,7 +8,9 @@ import (
 
 	"github.com/go-faster/errors"
 	"github.com/go-faster/jx"
+	"github.com/google/uuid"
 
+	"github.com/ogen-go/ogen/json"
 	"github.com/ogen-go/ogen/validate"
 )
 
@@ -679,9 +681,9 @@ func (s *OptString) UnmarshalJSON(data []byte) error {
 
 // Encode encodes OrderUUID as json.
 func (s OrderUUID) Encode(e *jx.Encoder) {
-	unwrapped := string(s)
+	unwrapped := uuid.UUID(s)
 
-	e.Str(unwrapped)
+	json.EncodeUUID(e, unwrapped)
 }
 
 // Decode decodes OrderUUID from json.
@@ -689,10 +691,10 @@ func (s *OrderUUID) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode OrderUUID to nil")
 	}
-	var unwrapped string
+	var unwrapped uuid.UUID
 	if err := func() error {
-		v, err := d.Str()
-		unwrapped = string(v)
+		v, err := json.DecodeUUID(d)
+		unwrapped = v
 		if err != nil {
 			return err
 		}
@@ -719,11 +721,11 @@ func (s *OrderUUID) UnmarshalJSON(data []byte) error {
 
 // Encode encodes PartUuids as json.
 func (s PartUuids) Encode(e *jx.Encoder) {
-	unwrapped := []string(s)
+	unwrapped := []uuid.UUID(s)
 
 	e.ArrStart()
 	for _, elem := range unwrapped {
-		e.Str(elem)
+		json.EncodeUUID(e, elem)
 	}
 	e.ArrEnd()
 }
@@ -733,13 +735,13 @@ func (s *PartUuids) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode PartUuids to nil")
 	}
-	var unwrapped []string
+	var unwrapped []uuid.UUID
 	if err := func() error {
-		unwrapped = make([]string, 0)
+		unwrapped = make([]uuid.UUID, 0)
 		if err := d.Arr(func(d *jx.Decoder) error {
-			var elem string
-			v, err := d.Str()
-			elem = string(v)
+			var elem uuid.UUID
+			v, err := json.DecodeUUID(d)
+			elem = v
 			if err != nil {
 				return err
 			}
@@ -1087,9 +1089,9 @@ func (s *TotalPrice) UnmarshalJSON(data []byte) error {
 
 // Encode encodes TransactionUUID as json.
 func (s TransactionUUID) Encode(e *jx.Encoder) {
-	unwrapped := string(s)
+	unwrapped := uuid.UUID(s)
 
-	e.Str(unwrapped)
+	json.EncodeUUID(e, unwrapped)
 }
 
 // Decode decodes TransactionUUID from json.
@@ -1097,10 +1099,10 @@ func (s *TransactionUUID) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode TransactionUUID to nil")
 	}
-	var unwrapped string
+	var unwrapped uuid.UUID
 	if err := func() error {
-		v, err := d.Str()
-		unwrapped = string(v)
+		v, err := json.DecodeUUID(d)
+		unwrapped = v
 		if err != nil {
 			return err
 		}
@@ -1127,9 +1129,9 @@ func (s *TransactionUUID) UnmarshalJSON(data []byte) error {
 
 // Encode encodes UserUUID as json.
 func (s UserUUID) Encode(e *jx.Encoder) {
-	unwrapped := string(s)
+	unwrapped := uuid.UUID(s)
 
-	e.Str(unwrapped)
+	json.EncodeUUID(e, unwrapped)
 }
 
 // Decode decodes UserUUID from json.
@@ -1137,10 +1139,10 @@ func (s *UserUUID) Decode(d *jx.Decoder) error {
 	if s == nil {
 		return errors.New("invalid: unable to decode UserUUID to nil")
 	}
-	var unwrapped string
+	var unwrapped uuid.UUID
 	if err := func() error {
-		v, err := d.Str()
-		unwrapped = string(v)
+		v, err := json.DecodeUUID(d)
+		unwrapped = v
 		if err != nil {
 			return err
 		}

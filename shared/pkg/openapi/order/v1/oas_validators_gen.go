@@ -4,6 +4,7 @@ package order_v1
 
 import (
 	"github.com/go-faster/errors"
+	"github.com/google/uuid"
 
 	"github.com/ogen-go/ogen/validate"
 )
@@ -111,7 +112,7 @@ func (s *GetOrderOK) Validate() error {
 }
 
 func (s PartUuids) Validate() error {
-	alias := ([]string)(s)
+	alias := ([]uuid.UUID)(s)
 	if alias == nil {
 		return errors.New("nil is invalid value")
 	}

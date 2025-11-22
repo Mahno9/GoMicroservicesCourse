@@ -81,17 +81,17 @@ func (_c *PartRepository_GetPart_Call) RunAndReturn(run func(context.Context, st
 	return _c
 }
 
-// InitWithDummy provides a mock function with no fields
-func (_m *PartRepository) InitWithDummy() error {
-	ret := _m.Called()
+// InitWithDummy provides a mock function with given fields: ctx
+func (_m *PartRepository) InitWithDummy(ctx context.Context) error {
+	ret := _m.Called(ctx)
 
 	if len(ret) == 0 {
 		panic("no return value specified for InitWithDummy")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func() error); ok {
-		r0 = rf()
+	if rf, ok := ret.Get(0).(func(context.Context) error); ok {
+		r0 = rf(ctx)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -105,13 +105,14 @@ type PartRepository_InitWithDummy_Call struct {
 }
 
 // InitWithDummy is a helper method to define mock.On call
-func (_e *PartRepository_Expecter) InitWithDummy() *PartRepository_InitWithDummy_Call {
-	return &PartRepository_InitWithDummy_Call{Call: _e.mock.On("InitWithDummy")}
+//   - ctx context.Context
+func (_e *PartRepository_Expecter) InitWithDummy(ctx interface{}) *PartRepository_InitWithDummy_Call {
+	return &PartRepository_InitWithDummy_Call{Call: _e.mock.On("InitWithDummy", ctx)}
 }
 
-func (_c *PartRepository_InitWithDummy_Call) Run(run func()) *PartRepository_InitWithDummy_Call {
+func (_c *PartRepository_InitWithDummy_Call) Run(run func(ctx context.Context)) *PartRepository_InitWithDummy_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run()
+		run(args[0].(context.Context))
 	})
 	return _c
 }
@@ -121,7 +122,7 @@ func (_c *PartRepository_InitWithDummy_Call) Return(_a0 error) *PartRepository_I
 	return _c
 }
 
-func (_c *PartRepository_InitWithDummy_Call) RunAndReturn(run func() error) *PartRepository_InitWithDummy_Call {
+func (_c *PartRepository_InitWithDummy_Call) RunAndReturn(run func(context.Context) error) *PartRepository_InitWithDummy_Call {
 	_c.Call.Return(run)
 	return _c
 }

@@ -28,24 +28,16 @@ type Manufacturer struct {
 }
 
 type Part struct {
-	Uuid          string
-	Name          string
-	Description   string
-	Price         float64
-	StockQuantity int64
-	Category      Category
-	Dimensions    *Dimensions
-	Manufacturer  *Manufacturer
-	Tags          []string
-	Metadata      map[string]any
-	CreatedAt     time.Time
-	UpdatedAt     *time.Time
-}
-
-type PartsFilter struct {
-	Uuids                 []string
-	Names                 []string
-	Categories            []Category
-	ManufacturerCountries []string
-	Tags                  []string
+	Uuid          string         `bson:"uuid"`
+	Name          string         `bson:"name"`
+	Description   string         `bson:"description"`
+	Price         float64        `bson:"price"`
+	StockQuantity int64          `bson:"stock_quantity"`
+	Category      Category       `bson:"category,omitempty"`
+	Dimensions    *Dimensions    `bson:"dimensions,omitempty"`
+	Manufacturer  *Manufacturer  `bson:"manufacturer,omitempty"`
+	Tags          []string       `bson:"tags,omitempty"`
+	Metadata      map[string]any `bson:"metadata,omitempty"`
+	CreatedAt     time.Time      `bson:"created_at"`
+	UpdatedAt     *time.Time     `bson:"updated_at,omitempty"`
 }

@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/go-faster/errors"
+	"github.com/google/uuid"
 )
 
 func (s *GenericErrorStatusCode) Error() string {
@@ -338,9 +339,9 @@ type OrderCancelNotFound struct{}
 
 func (*OrderCancelNotFound) orderCancelRes() {}
 
-type OrderUUID string
+type OrderUUID uuid.UUID
 
-type PartUuids []string
+type PartUuids []uuid.UUID
 
 // PayOrderConflict is response for PayOrder operation.
 type PayOrderConflict struct{}
@@ -493,6 +494,6 @@ func (s *Status) UnmarshalText(data []byte) error {
 
 type TotalPrice float64
 
-type TransactionUUID string
+type TransactionUUID uuid.UUID
 
-type UserUUID string
+type UserUUID uuid.UUID

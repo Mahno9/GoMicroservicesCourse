@@ -1,6 +1,8 @@
 package part
 
 import (
+	"context"
+	"log"
 	"math"
 	"time"
 
@@ -10,12 +12,20 @@ import (
 	repoModel "github.com/Mahno9/GoMicroservicesCourse/inventory/internal/repository/model"
 )
 
-func (r *repository) InitWithDummy() error {
+func (r *repository) InitWithDummy(ctx context.Context) error {
 	parts := generateParts()
 
-	for _, part := range parts {
-		r.Add(part)
+	interfaceParts := make([]interface{}, len(parts))
+	for i, part := range parts {
+		interfaceParts[i] = part
 	}
+
+	result, err := r.collection.InsertMany(ctx, interfaceParts)
+	if err != nil {
+		return err
+	}
+
+	log.Printf("📝 Inserted %d parts\n", len(result.InsertedIDs))
 
 	return nil
 }

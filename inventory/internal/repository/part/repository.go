@@ -1,58 +1,45 @@
 package part
 
 import (
-	"sync"
+	"context"
+	"time"
 
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+
+	model "github.com/Mahno9/GoMicroservicesCourse/inventory/internal/model"
 	def "github.com/Mahno9/GoMicroservicesCourse/inventory/internal/repository"
-	repoModel "github.com/Mahno9/GoMicroservicesCourse/inventory/internal/repository/model"
+)
+
+const (
+	databasePartsCollection = "parts"
+	indexCreationTimeout    = 5 * time.Second
 )
 
 var _ def.PartRepository = (*repository)(nil)
 
 type repository struct {
-	mut  sync.RWMutex
-	data map[string]*repoModel.Part
+	collection def.MongoCollection
 }
 
-func NewRepository() *repository {
+func NewRepository(ctx context.Context, db def.MongoDatabase) (*repository, error) {
+	collection := db.Collection(databasePartsCollection)
+
+	indexModel := mongo.IndexModel{
+		Keys:    bson.D{{Key: "uuid", Value: 1}},
+		Options: options.Index().SetUnique(true),
+	}
+
+	ctx, cancel := context.WithTimeout(ctx, indexCreationTimeout)
+	defer cancel()
+
+	_, err := collection.Indexes().CreateOne(ctx, indexModel)
+	if err != nil {
+		return nil, model.ErrDbIndexInitFailed
+	}
+
 	return &repository{
-		data: map[string]*repoModel.Part{},
-		mut:  sync.RWMutex{},
-	}
-}
-
-func (s *repository) Add(part *repoModel.Part) {
-	s.mut.Lock()
-	defer s.mut.Unlock()
-	s.data[part.Uuid] = part
-}
-
-func (s *repository) Get(uuid string) (*repoModel.Part, bool) {
-	s.mut.RLock()
-	defer s.mut.RUnlock()
-	v, ok := s.data[uuid]
-	return v, ok
-}
-
-func (s *repository) Contains(uuid string) bool {
-	s.mut.RLock()
-	defer s.mut.RUnlock()
-	_, ok := s.data[uuid]
-	return ok
-}
-
-func (s *repository) GetAll() []*repoModel.Part {
-	s.mut.RLock()
-	defer s.mut.RUnlock()
-	parts := make([]*repoModel.Part, 0, len(s.data))
-	for _, part := range s.data {
-		parts = append(parts, part)
-	}
-	return parts
-}
-
-func (s *repository) Count() int {
-	s.mut.RLock()
-	defer s.mut.RUnlock()
-	return len(s.data)
+		collection: collection,
+	}, nil
 }

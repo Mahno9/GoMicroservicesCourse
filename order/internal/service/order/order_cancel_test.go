@@ -2,6 +2,7 @@ package order
 
 import (
 	"github.com/brianvoe/gofakeit/v7"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/mock"
 
 	"github.com/Mahno9/GoMicroservicesCourse/order/internal/model"
@@ -9,16 +10,16 @@ import (
 
 func (s *ServiceSuite) TestOrderCancelMainFlow() {
 	var (
-		orderUuid  = gofakeit.UUID()
-		userUuid   = gofakeit.UUID()
-		partUuid1  = gofakeit.UUID()
-		partUuid2  = gofakeit.UUID()
-		totalPrice = gofakeit.Float64()
+		orderUuid, _ = uuid.Parse(gofakeit.UUID())
+		userUuid, _  = uuid.Parse(gofakeit.UUID())
+		partUuid1, _ = uuid.Parse(gofakeit.UUID())
+		partUuid2, _ = uuid.Parse(gofakeit.UUID())
+		totalPrice   = gofakeit.Float64()
 
 		order = &model.Order{
 			OrderUuid:  orderUuid,
 			UserUuid:   userUuid,
-			PartUuids:  []string{partUuid1, partUuid2},
+			PartUuids:  []uuid.UUID{partUuid1, partUuid2},
 			TotalPrice: totalPrice,
 			Status:     model.StatusPENDINGPAYMENT,
 		}
@@ -42,7 +43,7 @@ func (s *ServiceSuite) TestOrderCancelMainFlow() {
 
 func (s *ServiceSuite) TestOrderCancelRepositoryGetError() {
 	var (
-		orderUuid     = gofakeit.UUID()
+		orderUuid, _  = uuid.Parse(gofakeit.UUID())
 		expectedError = model.ErrOrderDoesNotExist
 	)
 
@@ -56,15 +57,15 @@ func (s *ServiceSuite) TestOrderCancelRepositoryGetError() {
 
 func (s *ServiceSuite) TestOrderCancelInvalidStatus() {
 	var (
-		orderUuid  = gofakeit.UUID()
-		userUuid   = gofakeit.UUID()
-		partUuid1  = gofakeit.UUID()
-		totalPrice = gofakeit.Float64()
+		orderUuid, _ = uuid.Parse(gofakeit.UUID())
+		userUuid, _  = uuid.Parse(gofakeit.UUID())
+		partUuid1, _ = uuid.Parse(gofakeit.UUID())
+		totalPrice   = gofakeit.Float64()
 
 		order = &model.Order{
 			OrderUuid:  orderUuid,
 			UserUuid:   userUuid,
-			PartUuids:  []string{partUuid1},
+			PartUuids:  []uuid.UUID{partUuid1},
 			TotalPrice: totalPrice,
 			Status:     model.StatusPAID, // Не pending payment
 		}
@@ -82,15 +83,15 @@ func (s *ServiceSuite) TestOrderCancelInvalidStatus() {
 
 func (s *ServiceSuite) TestOrderCancelRepositoryUpdateError() {
 	var (
-		orderUuid  = gofakeit.UUID()
-		userUuid   = gofakeit.UUID()
-		partUuid1  = gofakeit.UUID()
-		totalPrice = gofakeit.Float64()
+		orderUuid, _ = uuid.Parse(gofakeit.UUID())
+		userUuid, _  = uuid.Parse(gofakeit.UUID())
+		partUuid1, _ = uuid.Parse(gofakeit.UUID())
+		totalPrice   = gofakeit.Float64()
 
 		order = &model.Order{
 			OrderUuid:  orderUuid,
 			UserUuid:   userUuid,
-			PartUuids:  []string{partUuid1},
+			PartUuids:  []uuid.UUID{partUuid1},
 			TotalPrice: totalPrice,
 			Status:     model.StatusPENDINGPAYMENT,
 		}

@@ -2,6 +2,7 @@ package order
 
 import (
 	"github.com/brianvoe/gofakeit/v7"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/mock"
 
 	"github.com/Mahno9/GoMicroservicesCourse/order/internal/model"
@@ -9,20 +10,20 @@ import (
 
 func (s *ServiceSuite) TestGetOrderMainFlow() {
 	var (
-		orderUuid   = gofakeit.UUID()
-		userUuid    = gofakeit.UUID()
-		partUuid1   = gofakeit.UUID()
-		partUuid2   = gofakeit.UUID()
-		totalPrice  = gofakeit.Float64()
-		paymentData = gofakeit.UUID()
+		orderUuid, _       = uuid.Parse(gofakeit.UUID())
+		userUuid, _        = uuid.Parse(gofakeit.UUID())
+		partUuid1, _       = uuid.Parse(gofakeit.UUID())
+		partUuid2, _       = uuid.Parse(gofakeit.UUID())
+		totalPrice         = gofakeit.Float64()
+		transactionUuid, _ = uuid.Parse(gofakeit.UUID())
 
 		expectedOrder = &model.Order{
 			OrderUuid:       orderUuid,
 			UserUuid:        userUuid,
-			PartUuids:       []string{partUuid1, partUuid2},
+			PartUuids:       []uuid.UUID{partUuid1, partUuid2},
 			TotalPrice:      totalPrice,
 			Status:          model.StatusPAID,
-			TransactionUuid: paymentData,
+			TransactionUuid: &transactionUuid,
 			PaymentMethod:   int32(gofakeit.Number(0, 4)),
 		}
 	)
@@ -37,7 +38,7 @@ func (s *ServiceSuite) TestGetOrderMainFlow() {
 
 func (s *ServiceSuite) TestGetOrderRepositoryError() {
 	var (
-		orderUuid     = gofakeit.UUID()
+		orderUuid, _  = uuid.Parse(gofakeit.UUID())
 		expectedError = model.ErrOrderDoesNotExist
 	)
 

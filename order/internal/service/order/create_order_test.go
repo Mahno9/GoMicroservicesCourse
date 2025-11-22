@@ -2,6 +2,7 @@ package order
 
 import (
 	"github.com/brianvoe/gofakeit/v7"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/mock"
 
 	"github.com/Mahno9/GoMicroservicesCourse/order/internal/model"
@@ -9,10 +10,10 @@ import (
 
 func (s *ServiceSuite) TestCreateOrderMainFlow() {
 	var (
-		userUuid  = gofakeit.UUID()
-		partUuid1 = gofakeit.UUID()
-		partUuid2 = gofakeit.UUID()
-		partUuid3 = gofakeit.UUID()
+		userUuid, _  = uuid.Parse(gofakeit.UUID())
+		partUuid1, _ = uuid.Parse(gofakeit.UUID())
+		partUuid2, _ = uuid.Parse(gofakeit.UUID())
+		partUuid3, _ = uuid.Parse(gofakeit.UUID())
 
 		partPrice1 = gofakeit.Float64()
 		partPrice2 = gofakeit.Float64()
@@ -20,7 +21,7 @@ func (s *ServiceSuite) TestCreateOrderMainFlow() {
 
 		createOrderData = model.CreateOrderData{
 			UserUuid:  userUuid,
-			PartUuids: []string{partUuid1, partUuid2, partUuid3},
+			PartUuids: []uuid.UUID{partUuid1, partUuid2, partUuid3},
 		}
 
 		orderParts = []*model.Part{
@@ -41,9 +42,9 @@ func (s *ServiceSuite) TestCreateOrderMainFlow() {
 		totalPrice = partPrice1 + partPrice2 + partPrice3
 
 		expectedOrder = &model.Order{
-			OrderUuid:  gofakeit.UUID(), // Будет сгенерирован в функции
+			OrderUuid:  uuid.MustParse(gofakeit.UUID()), // Будет сгенерирован в функции
 			UserUuid:   userUuid,
-			PartUuids:  []string{partUuid1, partUuid2, partUuid3},
+			PartUuids:  []uuid.UUID{partUuid1, partUuid2, partUuid3},
 			TotalPrice: totalPrice,
 			Status:     model.StatusPENDINGPAYMENT, // По умолчанию при создании
 		}
@@ -70,13 +71,13 @@ func (s *ServiceSuite) TestCreateOrderMainFlow() {
 
 func (s *ServiceSuite) TestCreateOrderInventoryError() {
 	var (
-		userUuid  = gofakeit.UUID()
-		partUuid1 = gofakeit.UUID()
-		partUuid2 = gofakeit.UUID()
+		userUuid, _  = uuid.Parse(gofakeit.UUID())
+		partUuid1, _ = uuid.Parse(gofakeit.UUID())
+		partUuid2, _ = uuid.Parse(gofakeit.UUID())
 
 		createOrderData = model.CreateOrderData{
 			UserUuid:  userUuid,
-			PartUuids: []string{partUuid1, partUuid2},
+			PartUuids: []uuid.UUID{partUuid1, partUuid2},
 		}
 
 		expectedError = model.ErrPartsNotAvailable
@@ -94,14 +95,14 @@ func (s *ServiceSuite) TestCreateOrderInventoryError() {
 
 func (s *ServiceSuite) TestCreateOrderPartsNotAvailable() {
 	var (
-		userUuid  = gofakeit.UUID()
-		partUuid1 = gofakeit.UUID()
-		partUuid2 = gofakeit.UUID()
-		partUuid3 = gofakeit.UUID()
+		userUuid, _  = uuid.Parse(gofakeit.UUID())
+		partUuid1, _ = uuid.Parse(gofakeit.UUID())
+		partUuid2, _ = uuid.Parse(gofakeit.UUID())
+		partUuid3, _ = uuid.Parse(gofakeit.UUID())
 
 		createOrderData = model.CreateOrderData{
 			UserUuid:  userUuid,
-			PartUuids: []string{partUuid1, partUuid2, partUuid3},
+			PartUuids: []uuid.UUID{partUuid1, partUuid2, partUuid3},
 		}
 
 		orderParts = []*model.Part{
@@ -129,16 +130,16 @@ func (s *ServiceSuite) TestCreateOrderPartsNotAvailable() {
 
 func (s *ServiceSuite) TestCreateOrderRepositoryCreateError() {
 	var (
-		userUuid  = gofakeit.UUID()
-		partUuid1 = gofakeit.UUID()
-		partUuid2 = gofakeit.UUID()
+		userUuid, _  = uuid.Parse(gofakeit.UUID())
+		partUuid1, _ = uuid.Parse(gofakeit.UUID())
+		partUuid2, _ = uuid.Parse(gofakeit.UUID())
 
 		partPrice1 = gofakeit.Float64()
 		partPrice2 = gofakeit.Float64()
 
 		createOrderData = model.CreateOrderData{
 			UserUuid:  userUuid,
-			PartUuids: []string{partUuid1, partUuid2},
+			PartUuids: []uuid.UUID{partUuid1, partUuid2},
 		}
 
 		orderParts = []*model.Part{

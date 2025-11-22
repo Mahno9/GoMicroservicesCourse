@@ -2,6 +2,7 @@ package order
 
 import (
 	"github.com/brianvoe/gofakeit/v7"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/mock"
 
 	"github.com/Mahno9/GoMicroservicesCourse/order/internal/model"
@@ -9,16 +10,16 @@ import (
 
 func (s *ServiceSuite) TestPayOrderMainFlow() {
 	var (
-		orderUuid     = gofakeit.UUID()
-		userUuid      = gofakeit.UUID()
+		orderUuid, _  = uuid.Parse(gofakeit.UUID())
+		userUuid, _   = uuid.Parse(gofakeit.UUID())
 		paymentMethod = int32(gofakeit.Number(0, 4))
 		totalPrice    = gofakeit.Float64()
 
-		transactionUuid = gofakeit.UUID()
+		transactionUuid, _ = uuid.Parse(gofakeit.UUID())
 
 		payOrderData = model.PayOrderData{
 			OrderUuid:     orderUuid,
-			UserUuid:      "",
+			UserUuid:      uuid.Nil, // Will be set from order
 			PaymentMethod: paymentMethod,
 		}
 
@@ -43,24 +44,24 @@ func (s *ServiceSuite) TestPayOrderMainFlow() {
 			len(order.PartUuids) == 0 && // В оригинальном заказе PartUuids не установлен
 			order.TotalPrice == totalPrice &&
 			order.Status == model.StatusPAID &&
-			order.TransactionUuid == transactionUuid &&
+			*order.TransactionUuid == transactionUuid &&
 			order.PaymentMethod == paymentMethod
 	})).Return(nil)
 
-	transactionUuid, err := s.service.PayOrder(s.ctx, payOrderData)
+	resultTransactionUuid, err := s.service.PayOrder(s.ctx, payOrderData)
 	s.NoError(err)
 	s.repository.AssertNumberOfCalls(s.T(), "Update", 1)
-	s.Equal(transactionUuid, transactionUuid)
+	s.Equal(transactionUuid, resultTransactionUuid)
 }
 
 func (s *ServiceSuite) TestPayOrderRepositoryGetError() {
 	var (
-		orderUuid     = gofakeit.UUID()
+		orderUuid, _  = uuid.Parse(gofakeit.UUID())
 		paymentMethod = int32(gofakeit.Number(0, 4))
 
 		payOrderData = model.PayOrderData{
 			OrderUuid:     orderUuid,
-			UserUuid:      "",
+			UserUuid:      uuid.Nil, // Will be set from order
 			PaymentMethod: paymentMethod,
 		}
 
@@ -78,14 +79,14 @@ func (s *ServiceSuite) TestPayOrderRepositoryGetError() {
 
 func (s *ServiceSuite) TestPayOrderInvalidStatus() {
 	var (
-		orderUuid     = gofakeit.UUID()
-		userUuid      = gofakeit.UUID()
+		orderUuid, _  = uuid.Parse(gofakeit.UUID())
+		userUuid, _   = uuid.Parse(gofakeit.UUID())
 		paymentMethod = int32(gofakeit.Number(0, 4))
 		totalPrice    = gofakeit.Float64()
 
 		payOrderData = model.PayOrderData{
 			OrderUuid:     orderUuid,
-			UserUuid:      "",
+			UserUuid:      uuid.Nil, // Will be set from order
 			PaymentMethod: paymentMethod,
 		}
 
@@ -107,14 +108,14 @@ func (s *ServiceSuite) TestPayOrderInvalidStatus() {
 
 func (s *ServiceSuite) TestPayOrderPaymentServiceError() {
 	var (
-		orderUuid     = gofakeit.UUID()
-		userUuid      = gofakeit.UUID()
+		orderUuid, _  = uuid.Parse(gofakeit.UUID())
+		userUuid, _   = uuid.Parse(gofakeit.UUID())
 		paymentMethod = int32(gofakeit.Number(0, 4))
 		totalPrice    = gofakeit.Float64()
 
 		payOrderData = model.PayOrderData{
 			OrderUuid:     orderUuid,
-			UserUuid:      "",
+			UserUuid:      uuid.Nil, // Will be set from order
 			PaymentMethod: paymentMethod,
 		}
 
@@ -131,7 +132,7 @@ func (s *ServiceSuite) TestPayOrderPaymentServiceError() {
 	s.repository.On("Get", mock.Anything, payOrderData.OrderUuid).Return(repoEntity, nil)
 
 	payOrderData.UserUuid = userUuid
-	s.payment.On("PayOrder", mock.Anything, payOrderData).Return("", paymentError)
+	s.payment.On("PayOrder", mock.Anything, payOrderData).Return(uuid.Nil, paymentError)
 
 	_, err := s.service.PayOrder(s.ctx, payOrderData)
 
@@ -141,16 +142,16 @@ func (s *ServiceSuite) TestPayOrderPaymentServiceError() {
 
 func (s *ServiceSuite) TestPayOrderRepositoryUpdateError() {
 	var (
-		orderUuid     = gofakeit.UUID()
-		userUuid      = gofakeit.UUID()
+		orderUuid, _  = uuid.Parse(gofakeit.UUID())
+		userUuid, _   = uuid.Parse(gofakeit.UUID())
 		paymentMethod = int32(gofakeit.Number(0, 4))
 		totalPrice    = gofakeit.Float64()
 
-		transactionUuid = gofakeit.UUID()
+		transactionUuid, _ = uuid.Parse(gofakeit.UUID())
 
 		payOrderData = model.PayOrderData{
 			OrderUuid:     orderUuid,
-			UserUuid:      "",
+			UserUuid:      uuid.Nil, // Will be set from order
 			PaymentMethod: paymentMethod,
 		}
 
@@ -174,7 +175,7 @@ func (s *ServiceSuite) TestPayOrderRepositoryUpdateError() {
 			order.UserUuid == userUuid &&
 			order.TotalPrice == totalPrice &&
 			order.Status == model.StatusPAID &&
-			order.TransactionUuid == transactionUuid &&
+			*order.TransactionUuid == transactionUuid &&
 			order.PaymentMethod == paymentMethod
 	})).Return(updateError)
 
