@@ -6,5 +6,6 @@ type LoggerConfig interface {
 }
 
 type GrpcConfig interface {
+	Host() string
 	Port() string
 }
