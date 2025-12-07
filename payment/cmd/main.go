@@ -18,17 +18,13 @@ import (
 )
 
 const (
-	envPathDefault  = ".env"
-	envPathEnvName  = "ENV_PATH"
-	grpcPortEnvName = "PAYMENT_SERVICE_PORT"
+	envPathDefault  = "deploy/compose/payment/.env"
+	grpcPortEnvName = "SERVICE_PORT"
 )
 
 func main() {
 	// Load .env variables
-	envPath := os.Getenv(envPathEnvName)
-	if envPath == "" {
-		envPath = envPathDefault
-	}
+	envPath := envPathDefault
 	err := godotenv.Load(envPath)
 	if err != nil {
 		log.Printf("❗ Failed to load env file: %v\n", err)

@@ -34,13 +34,12 @@ const (
 	readHeaderTimeout = 5 * time.Second
 	shutdownTimeout   = 10 * time.Second
 
-	envPathDefault = ".env"
-	envPathEnvName = "ENV_PATH"
+	envPathDefault = "deploy/compose/order/.env"
 
-	serviceHttpHostEnvName = "ORDER_SERVICE_URL"
-	serviceHttpPortEnvName = "ORDER_SERVICE_PORT"
-	databaseUriEnvName     = "ORDER_DB_URI"
-	migrationsDirEnvName   = "ORDER_MIGRATIONS_DIR"
+	serviceHttpHostEnvName = "SERVICE_URL"
+	serviceHttpPortEnvName = "SERVICE_PORT"
+	databaseUriEnvName     = "POSTGRE_URI"
+	migrationsDirEnvName   = "MIGRATIONS_DIR"
 
 	inventoryAddressEnvName = "INVENTORY_SERVICE_ADDRESS"
 	paymentAddressEnvName   = "PAYMENT_SERVICE_ADDRESS"
@@ -50,10 +49,7 @@ func main() {
 	ctx := context.Background()
 
 	// Load .env variables
-	envPath := os.Getenv(envPathEnvName)
-	if envPath == "" {
-		envPath = envPathDefault
-	}
+	envPath := envPathDefault
 	err := godotenv.Load(envPath)
 	if err != nil {
 		log.Printf("❗ Failed to load env file: %v\n", err)

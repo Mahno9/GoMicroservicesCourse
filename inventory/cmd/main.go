@@ -26,21 +26,17 @@ import (
 const (
 	initPartsTimeout = 5 * time.Second
 
-	envPathDefault      = ".env"
-	envPathEnvName      = "ENV_PATH"
-	grpcPortEnvName     = "INVENTORY_SERVICE_PORT"
-	databaseUriEnvName  = "INVENTORY_DB_URI"
-	databaseNameEnvName = "INVENTORY_DB_NAME"
+	envPathDefault      = "deploy/compose/inventory/.env"
+	grpcPortEnvName     = "SERVICE_PORT"
+	databaseUriEnvName  = "MONGO_URI"
+	databaseNameEnvName = "MONGO_INITDB_DATABASE"
 )
 
 func main() {
 	ctx := context.Background()
 
 	// Load .env variables
-	envPath := os.Getenv(envPathEnvName)
-	if envPath == "" {
-		envPath = envPathDefault
-	}
+	envPath := envPathDefault
 	err := godotenv.Load(envPath)
 	if err != nil {
 		log.Printf("❗ Failed to load env file: %v\n", err)
