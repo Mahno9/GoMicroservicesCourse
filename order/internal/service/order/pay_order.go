@@ -32,7 +32,6 @@ func (s *service) PayOrder(ctx context.Context, orderData model.PayOrderData) (u
 		return uuid.Nil, err
 	}
 
-	// TODO: add test for this
 	err = s.produceOrderPaidEvent(ctx, order)
 	if err != nil {
 		return uuid.Nil, err

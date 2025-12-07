@@ -48,9 +48,16 @@ func (s *ServiceSuite) TestPayOrderMainFlow() {
 			order.PaymentMethod == paymentMethod
 	})).Return(nil)
 
+	s.producerService.On("ProduceOrderPaid", mock.Anything, mock.MatchedBy(func(event model.OrderPaidEvent) bool {
+		return event.OrderUuid == transactionUuid.String() &&
+			event.UserUuid == userUuid.String() &&
+			event.TransactionUuid == transactionUuid.String()
+	})).Return(nil)
+
 	resultTransactionUuid, err := s.service.PayOrder(s.ctx, payOrderData)
 	s.NoError(err)
 	s.repository.AssertNumberOfCalls(s.T(), "Update", 1)
+	s.producerService.AssertNumberOfCalls(s.T(), "ProduceOrderPaid", 1)
 	s.Equal(transactionUuid, resultTransactionUuid)
 }
 
@@ -75,6 +82,7 @@ func (s *ServiceSuite) TestPayOrderRepositoryGetError() {
 	s.ErrorIs(err, repoError)
 	s.payment.AssertNotCalled(s.T(), "PayOrder", s.ctx, payOrderData)
 	s.repository.AssertNumberOfCalls(s.T(), "Update", 0)
+	s.producerService.AssertNotCalled(s.T(), "ProduceOrderPaid", mock.Anything, mock.Anything)
 }
 
 func (s *ServiceSuite) TestPayOrderInvalidStatus() {
@@ -104,6 +112,7 @@ func (s *ServiceSuite) TestPayOrderInvalidStatus() {
 	s.ErrorIs(err, model.ErrOrderCancelConflict)
 	s.payment.AssertNotCalled(s.T(), "PayOrder", s.ctx, payOrderData)
 	s.repository.AssertNumberOfCalls(s.T(), "Update", 0)
+	s.producerService.AssertNotCalled(s.T(), "ProduceOrderPaid", mock.Anything, mock.Anything)
 }
 
 func (s *ServiceSuite) TestPayOrderPaymentServiceError() {
@@ -138,6 +147,7 @@ func (s *ServiceSuite) TestPayOrderPaymentServiceError() {
 
 	s.ErrorIs(err, paymentError)
 	s.repository.AssertNumberOfCalls(s.T(), "Update", 0)
+	s.producerService.AssertNotCalled(s.T(), "ProduceOrderPaid", mock.Anything, mock.Anything)
 }
 
 func (s *ServiceSuite) TestPayOrderRepositoryUpdateError() {
@@ -182,4 +192,58 @@ func (s *ServiceSuite) TestPayOrderRepositoryUpdateError() {
 	_, err := s.service.PayOrder(s.ctx, payOrderData)
 
 	s.ErrorIs(err, updateError)
+	s.producerService.AssertNotCalled(s.T(), "ProduceOrderPaid", mock.Anything, mock.Anything)
+}
+
+func (s *ServiceSuite) TestPayOrderProducerServiceError() {
+	var (
+		orderUuid, _  = uuid.Parse(gofakeit.UUID())
+		userUuid, _   = uuid.Parse(gofakeit.UUID())
+		paymentMethod = int32(gofakeit.Number(0, 4))
+		totalPrice    = gofakeit.Float64()
+
+		transactionUuid, _ = uuid.Parse(gofakeit.UUID())
+
+		payOrderData = model.PayOrderData{
+			OrderUuid:     orderUuid,
+			UserUuid:      uuid.Nil, // Will be set from order
+			PaymentMethod: paymentMethod,
+		}
+
+		repoEntity = &model.Order{
+			OrderUuid:  orderUuid,
+			UserUuid:   userUuid,
+			Status:     model.StatusPENDINGPAYMENT,
+			TotalPrice: totalPrice,
+		}
+
+		producerError = model.ErrKafkaSend
+	)
+
+	s.repository.On("Get", mock.Anything, payOrderData.OrderUuid).Return(repoEntity, nil)
+
+	payOrderData.UserUuid = userUuid
+	s.payment.On("PayOrder", mock.Anything, payOrderData).Return(transactionUuid, nil)
+
+	s.repository.On("Update", mock.Anything, mock.MatchedBy(func(order *model.Order) bool {
+		return order.OrderUuid == orderUuid &&
+			order.UserUuid == userUuid &&
+			order.TotalPrice == totalPrice &&
+			order.Status == model.StatusPAID &&
+			*order.TransactionUuid == transactionUuid &&
+			order.PaymentMethod == paymentMethod
+	})).Return(nil)
+
+	s.producerService.On("ProduceOrderPaid", mock.Anything, mock.MatchedBy(func(event model.OrderPaidEvent) bool {
+		return event.OrderUuid == transactionUuid.String() &&
+			event.UserUuid == userUuid.String() &&
+			event.TransactionUuid == transactionUuid.String() &&
+			event.PaymentMethod != "" // Check that payment method is set
+	})).Return(producerError)
+
+	_, err := s.service.PayOrder(s.ctx, payOrderData)
+
+	s.ErrorIs(err, producerError)
+	s.repository.AssertNumberOfCalls(s.T(), "Update", 1)
+	s.producerService.AssertNumberOfCalls(s.T(), "ProduceOrderPaid", 1)
 }

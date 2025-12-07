@@ -45,6 +45,8 @@ func (s *ServiceSuite) SetupTest() {
 	s.inventory.Calls = nil
 	s.payment.ExpectedCalls = nil
 	s.payment.Calls = nil
+	s.producerService.ExpectedCalls = nil
+	s.producerService.Calls = nil
 }
 
 func TestServiceIntegration(t *testing.T) {
