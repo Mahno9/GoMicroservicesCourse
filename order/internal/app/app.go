@@ -35,6 +35,10 @@ func New(ctx context.Context, cfg *config.Config) (*App, error) {
 	return a, nil
 }
 
+func (a *App) Run(ctx context.Context) error {
+	return a.runHttpServer(ctx)
+}
+
 func (a *App) initDeps(ctx context.Context, cfg *config.Config) error {
 	inits := []func(ctx context.Context, cfg *config.Config) error{
 		a.initDI,
@@ -51,10 +55,6 @@ func (a *App) initDeps(ctx context.Context, cfg *config.Config) error {
 	}
 
 	return nil
-}
-
-func (a *App) Run(ctx context.Context) error {
-	return a.runHttpServer(ctx)
 }
 
 func (a *App) runHttpServer(ctx context.Context) error {
@@ -88,6 +88,10 @@ func (a *App) initHttpServer(ctx context.Context, cfg *config.Config) error {
 		Handler:           a.diContainer.Router(ctx),
 		ReadHeaderTimeout: readHeaderTimeout,
 	}
+
+	closer.AddNamed("HTTP server", func(ctx context.Context) error {
+		return a.server.Shutdown(ctx)
+	})
 
 	return nil
 }
