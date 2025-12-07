@@ -13,5 +13,4 @@ packages:
       include-regex: "(.*Repository|Mongo.*)"
   github.com/Mahno9/GoMicroservicesCourse/order/internal:
     config:
-      include-regex: ".*(Repository|Client)"
-
+      include-regex: ".*(Repository|Client|ProducerService)"

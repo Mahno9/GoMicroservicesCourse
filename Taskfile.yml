@@ -39,7 +39,7 @@ vars:
 
   MODULES: assembly inventory order payment platform iam notification
   # For env generation
-  SERVICES: inventory,order,payment
+  SERVICES: inventory,order,payment,assembly,notification,core
 
 tasks:
   install-formatters:
