@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"log"
-	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -15,13 +14,13 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/jackc/pgx/v5/stdlib"
-	"github.com/joho/godotenv"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
 	orderApiHandlerV1 "github.com/Mahno9/GoMicroservicesCourse/order/internal/api/order/v1"
 	inventoryClientV1 "github.com/Mahno9/GoMicroservicesCourse/order/internal/client/grpc/inventory/v1"
 	paymentClientV1 "github.com/Mahno9/GoMicroservicesCourse/order/internal/client/grpc/payment/v1"
+	"github.com/Mahno9/GoMicroservicesCourse/order/internal/config"
 	"github.com/Mahno9/GoMicroservicesCourse/order/internal/repository/migrator"
 	orderRepo "github.com/Mahno9/GoMicroservicesCourse/order/internal/repository/order"
 	orderModel "github.com/Mahno9/GoMicroservicesCourse/order/internal/service/order"
@@ -34,30 +33,21 @@ const (
 	readHeaderTimeout = 5 * time.Second
 	shutdownTimeout   = 10 * time.Second
 
-	envPathDefault = "deploy/compose/order/.env"
-
-	serviceHttpHostEnvName = "SERVICE_URL"
-	serviceHttpPortEnvName = "SERVICE_PORT"
-	databaseUriEnvName     = "POSTGRE_URI"
-	migrationsDirEnvName   = "MIGRATIONS_DIR"
-
-	inventoryAddressEnvName = "INVENTORY_SERVICE_ADDRESS"
-	paymentAddressEnvName   = "PAYMENT_SERVICE_ADDRESS"
+	configPath = "deploy/compose/order/.env"
 )
 
 func main() {
 	ctx := context.Background()
 
 	// Load .env variables
-	envPath := envPathDefault
-	err := godotenv.Load(envPath)
+	cfg, err := config.Load(configPath)
 	if err != nil {
 		log.Printf("❗ Failed to load env file: %v\n", err)
 		return
 	}
 
 	// Inventory
-	inventoryConn, err := grpc.NewClient(os.Getenv(inventoryAddressEnvName),
+	inventoryConn, err := grpc.NewClient(cfg.ClientsConfig.InventoryAddress(),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
@@ -79,7 +69,7 @@ func main() {
 	}
 
 	// Payment
-	paymentConn, err := grpc.NewClient(os.Getenv(paymentAddressEnvName),
+	paymentConn, err := grpc.NewClient(cfg.ClientsConfig.PaymentAddress(),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
@@ -101,7 +91,7 @@ func main() {
 	}
 
 	// Order Repository: DB connection
-	dbConnPool, err := pgxpool.New(ctx, os.Getenv(databaseUriEnvName))
+	dbConnPool, err := pgxpool.New(ctx, cfg.PostgresConfig.URI())
 	if err != nil {
 		log.Printf("❗ Failed to create database connection pool: %v\n", err)
 		return
@@ -114,7 +104,7 @@ func main() {
 	}
 
 	// Order Repository: migration
-	migratorRunner := migrator.NewMigrator(stdlib.OpenDB(*dbConnPool.Config().Copy().ConnConfig), os.Getenv(migrationsDirEnvName))
+	migratorRunner := migrator.NewMigrator(stdlib.OpenDB(*dbConnPool.Config().Copy().ConnConfig), cfg.PostgresConfig.MigrationsDir())
 	err = migratorRunner.Up()
 	if err != nil {
 		log.Printf("❗ Failed to run migrations: %v\n", err)
@@ -144,13 +134,13 @@ func main() {
 	router.Mount("/", orderServer)
 
 	httpServer := &http.Server{
-		Addr:              net.JoinHostPort(os.Getenv(serviceHttpHostEnvName), os.Getenv(serviceHttpPortEnvName)),
+		Addr:              cfg.HttpConfig.Address(),
 		Handler:           router,
 		ReadHeaderTimeout: readHeaderTimeout,
 	}
 
 	go func() {
-		log.Printf("👂 HTTP-сервер запущен на порту %s\n", os.Getenv(serviceHttpPortEnvName))
+		log.Printf("👂 HTTP-сервер запущен на порту %s\n", cfg.HttpConfig.Port())
 		err := httpServer.ListenAndServe()
 		if err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Printf("❗ Ошибка при запуске HTTP-сервера: %v\n", err)

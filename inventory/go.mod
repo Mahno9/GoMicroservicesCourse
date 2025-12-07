@@ -5,6 +5,7 @@ go 1.25.3
 require (
 	github.com/Mahno9/GoMicroservicesCourse/shared v0.0.0-20251110084421-a355d9d07704
 	github.com/brianvoe/gofakeit/v7 v7.8.1
+	github.com/caarlos0/env/v11 v11.3.1
 	github.com/google/uuid v1.6.0
 	github.com/joho/godotenv v1.5.1
 	github.com/samber/lo v1.52.0

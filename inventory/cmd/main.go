@@ -10,13 +10,13 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
 	partV1API "github.com/Mahno9/GoMicroservicesCourse/inventory/internal/api/inventory/v1"
+	"github.com/Mahno9/GoMicroservicesCourse/inventory/internal/config"
 	"github.com/Mahno9/GoMicroservicesCourse/inventory/internal/repository"
 	partRepository "github.com/Mahno9/GoMicroservicesCourse/inventory/internal/repository/part"
 	partService "github.com/Mahno9/GoMicroservicesCourse/inventory/internal/service/part"
@@ -26,25 +26,23 @@ import (
 const (
 	initPartsTimeout = 5 * time.Second
 
-	envPathDefault      = "deploy/compose/inventory/.env"
-	grpcPortEnvName     = "SERVICE_PORT"
-	databaseUriEnvName  = "MONGO_URI"
-	databaseNameEnvName = "MONGO_INITDB_DATABASE"
+	configPath = "deploy/compose/inventory/.env"
 )
 
 func main() {
 	ctx := context.Background()
 
 	// Load .env variables
-	envPath := envPathDefault
-	err := godotenv.Load(envPath)
+	cfg, err := config.Load(configPath)
 	if err != nil {
 		log.Printf("❗ Failed to load env file: %v\n", err)
 		return
+	} else {
+		log.Printf("✅ Env file loaded successfully: %+v\n", cfg)
 	}
 
 	// Inventory Repository
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(os.Getenv(databaseUriEnvName)))
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(cfg.MongoConfig.URI()))
 	if err != nil {
 		log.Printf("❗ failed to connect to database: %v\n", err)
 		return
@@ -60,7 +58,7 @@ func main() {
 		return
 	}
 
-	inventoryDb := client.Database(os.Getenv(databaseNameEnvName))
+	inventoryDb := client.Database(cfg.MongoConfig.DatabaseName())
 	wrappedDb := &repository.MongoDatabaseAdapter{Database: inventoryDb}
 	partRepo, err := partRepository.NewRepository(ctx, wrappedDb)
 	if err != nil {
@@ -89,7 +87,7 @@ func main() {
 
 	reflection.Register(grpcServer)
 
-	listener, err := net.Listen("tcp", fmt.Sprintf(":%s", os.Getenv(grpcPortEnvName)))
+	listener, err := net.Listen("tcp", fmt.Sprintf(":%s", cfg.GrpcConfig.Port()))
 	if err != nil {
 		log.Printf("❗ failed to listen: %v\n", err)
 		return
@@ -101,7 +99,7 @@ func main() {
 	}()
 
 	go func() {
-		log.Printf("👂 gRPC server listening on port %s\n", os.Getenv(grpcPortEnvName))
+		log.Printf("👂 gRPC server listening on port %s\n", cfg.GrpcConfig.Port())
 		err = grpcServer.Serve(listener)
 		if err != nil {
 			log.Printf("❗ failed to serve: %v\n", err)

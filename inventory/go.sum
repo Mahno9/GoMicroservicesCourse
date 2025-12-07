@@ -2,6 +2,8 @@ github.com/Mahno9/GoMicroservicesCourse/shared v0.0.0-20251110084421-a355d9d0770
 github.com/Mahno9/GoMicroservicesCourse/shared v0.0.0-20251110084421-a355d9d07704/go.mod h1:EQh38kiIUtWv7br5g1tT5o4/aMoyuev9CrONrF8MdEE=
 github.com/brianvoe/gofakeit/v7 v7.8.1 h1:ZrN4tC2moLTOm6rjrE+dxlDA9bNH1v71LX8Nal1eyV4=
 github.com/brianvoe/gofakeit/v7 v7.8.1/go.mod h1:QXuPeBw164PJCzCUZVmgpgHJ3Llj49jSLVkKPMtxtxA=
+github.com/caarlos0/env/v11 v11.3.1 h1:cArPWC15hWmEt+gWk7YBi7lEXTXCvpaSdCiZE2X5mCA=
+github.com/caarlos0/env/v11 v11.3.1/go.mod h1:qupehSf/Y0TUTsxKywqRt/vJjN5nz6vauiYEUUr8P4U=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
