@@ -11,6 +11,7 @@ import (
 
 	"github.com/Mahno9/GoMicroservicesCourse/inventory/internal/repository/mocks"
 	repoModel "github.com/Mahno9/GoMicroservicesCourse/inventory/internal/repository/model"
+	"github.com/Mahno9/GoMicroservicesCourse/platform/pkg/logger"
 )
 
 type RepositorySuite struct {
@@ -25,6 +26,10 @@ type RepositorySuite struct {
 
 func (s *RepositorySuite) SetupSuite() {
 	s.ctx = context.Background()
+
+	if err := logger.Init("test", false); err != nil {
+		s.T().Errorf("Failed to initialize logger: %v", err)
+	}
 
 	s.collection = mocks.NewMongoCollection(s.T())
 	s.db = mocks.NewMongoDatabase(s.T())

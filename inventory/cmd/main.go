@@ -3,14 +3,16 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 	"os/signal"
 	"syscall"
 	"time"
 
+	"go.uber.org/zap"
+
 	"github.com/Mahno9/GoMicroservicesCourse/inventory/internal/app"
 	"github.com/Mahno9/GoMicroservicesCourse/inventory/internal/config"
 	"github.com/Mahno9/GoMicroservicesCourse/platform/pkg/closer"
+	"github.com/Mahno9/GoMicroservicesCourse/platform/pkg/logger"
 )
 
 const (
@@ -47,6 +49,6 @@ func gracefulShutdown() {
 	defer cancel()
 
 	if err := closer.CloseAll(ctx); err != nil {
-		log.Printf("❗ failed to close all: %v\n", err)
+		logger.Error(ctx, "❗ failed to close all: %v", zap.Error(err))
 	}
 }
