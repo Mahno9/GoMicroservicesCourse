@@ -38,7 +38,7 @@ func main() {
 		panic(fmt.Errorf("❗ Failed to create app: %w", err))
 	}
 
-	err = a.Run(appCtx, cfg)
+	err = a.Run(appCtx)
 	if err != nil {
 		panic(fmt.Errorf("❗ Failed to run app: %w", err))
 	}

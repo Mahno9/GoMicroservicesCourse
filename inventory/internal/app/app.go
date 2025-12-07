@@ -32,8 +32,8 @@ func New(ctx context.Context, cfg *config.Config) (*App, error) {
 	return a, nil
 }
 
-func (a *App) Run(ctx context.Context, cfg *config.Config) error {
-	return a.runGRPCServer(ctx, cfg)
+func (a *App) Run(ctx context.Context) error {
+	return a.runGRPCServer(ctx)
 }
 
 func (a *App) initDeps(ctx context.Context, cfg *config.Config) error {
@@ -56,7 +56,7 @@ func (a *App) initDeps(ctx context.Context, cfg *config.Config) error {
 }
 
 func (a *App) initDI(ctx context.Context, cfg *config.Config) error {
-	a.diContainer = NewDIContainer()
+	a.diContainer = NewDIContainer(cfg)
 	return nil
 }
 
@@ -93,13 +93,13 @@ func (a *App) initGRPCServer(ctx context.Context, cfg *config.Config) error {
 
 	reflection.Register(a.grpcServer)
 	health.RegisterService(a.grpcServer)
-	genInventoryV1.RegisterInventoryServiceServer(a.grpcServer, a.diContainer.InventoryV1API(ctx, cfg))
+	genInventoryV1.RegisterInventoryServiceServer(a.grpcServer, a.diContainer.InventoryV1API(ctx))
 
 	return nil
 }
 
-func (a *App) runGRPCServer(ctx context.Context, cfg *config.Config) error {
-	logger.Info(ctx, fmt.Sprintf("👂 gRPC server listening on port %s", cfg.GrpcConfig.Port()))
+func (a *App) runGRPCServer(ctx context.Context) error {
+	logger.Info(ctx, fmt.Sprintf("👂 gRPC server listening on port %s", a.diContainer.config.GrpcConfig.Port()))
 
 	err := a.grpcServer.Serve(a.listener)
 	if err != nil {

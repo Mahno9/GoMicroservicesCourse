@@ -18,6 +18,8 @@ import (
 )
 
 type diContainer struct {
+	config *config.Config
+
 	inventoryV1API genInventoryV1.InventoryServiceServer
 	partService    service.PartService
 	partRepository repository.PartRepository
@@ -26,21 +28,21 @@ type diContainer struct {
 	mongoDBHandle *mongo.Database
 }
 
-func NewDIContainer() *diContainer {
-	return &diContainer{}
+func NewDIContainer(cfg *config.Config) *diContainer {
+	return &diContainer{config: cfg}
 }
 
-func (c *diContainer) InventoryV1API(ctx context.Context, cfg *config.Config) genInventoryV1.InventoryServiceServer {
+func (c *diContainer) InventoryV1API(ctx context.Context) genInventoryV1.InventoryServiceServer {
 	if c.inventoryV1API == nil {
-		c.inventoryV1API = inventoryV1.NewAPI(c.PartService(ctx, cfg))
+		c.inventoryV1API = inventoryV1.NewAPI(c.PartService(ctx))
 	}
 
 	return c.inventoryV1API
 }
 
-func (c *diContainer) PartService(ctx context.Context, cfg *config.Config) service.PartService {
+func (c *diContainer) PartService(ctx context.Context) service.PartService {
 	if c.partService == nil {
-		c.partService = partService.NewService(c.PartRepository(ctx, cfg))
+		c.partService = partService.NewService(c.PartRepository(ctx))
 
 		// Init with dummy here
 		err := c.partService.InitWithDummy(ctx)
@@ -52,10 +54,10 @@ func (c *diContainer) PartService(ctx context.Context, cfg *config.Config) servi
 	return c.partService
 }
 
-func (c *diContainer) PartRepository(ctx context.Context, cfg *config.Config) repository.PartRepository {
+func (c *diContainer) PartRepository(ctx context.Context) repository.PartRepository {
 	if c.partRepository == nil {
 		var err error
-		c.partRepository, err = partRepository.NewRepository(ctx, &repository.MongoDatabaseAdapter{Database: c.MongoDBHandle(ctx, cfg)})
+		c.partRepository, err = partRepository.NewRepository(ctx, &repository.MongoDatabaseAdapter{Database: c.MongoDBHandle(ctx)})
 		if err != nil {
 			panic(fmt.Sprintf("❗ failed to create repository: %v\n", err.Error()))
 		}
@@ -64,17 +66,17 @@ func (c *diContainer) PartRepository(ctx context.Context, cfg *config.Config) re
 	return c.partRepository
 }
 
-func (c *diContainer) MongoDBHandle(ctx context.Context, cfg *config.Config) *mongo.Database {
+func (c *diContainer) MongoDBHandle(ctx context.Context) *mongo.Database {
 	if c.mongoDBHandle == nil {
-		c.mongoDBHandle = c.MongoDBClient(ctx, cfg).Database(cfg.MongoConfig.DatabaseName())
+		c.mongoDBHandle = c.MongoDBClient(ctx).Database(c.config.MongoConfig.DatabaseName())
 	}
 	return c.mongoDBHandle
 }
 
-func (c *diContainer) MongoDBClient(ctx context.Context, cfg *config.Config) *mongo.Client {
+func (c *diContainer) MongoDBClient(ctx context.Context) *mongo.Client {
 	if c.mongoDBClient == nil {
 		var err error
-		c.mongoDBClient, err = mongo.Connect(ctx, options.Client().ApplyURI(cfg.MongoConfig.URI()))
+		c.mongoDBClient, err = mongo.Connect(ctx, options.Client().ApplyURI(c.config.MongoConfig.URI()))
 		if err != nil {
 			panic(fmt.Sprintf("❗ failed to create client: %v\n", err.Error()))
 		}
