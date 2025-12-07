@@ -10,7 +10,7 @@ services:
       - postgres_order_data:/var/lib/postgresql/data
 
     ports:
-      - ${POSTGRE_PORT}:5432
+      - ${POSTGRES_PORT}:5432
 
     restart: unless-stopped
 

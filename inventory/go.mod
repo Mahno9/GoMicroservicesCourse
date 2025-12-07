@@ -2,7 +2,10 @@ module github.com/Mahno9/GoMicroservicesCourse/inventory
 
 go 1.25.3
 
+replace github.com/Mahno9/GoMicroservicesCourse/platform => ../platform
+
 require (
+	github.com/Mahno9/GoMicroservicesCourse/platform v0.0.0-00010101000000-000000000000
 	github.com/Mahno9/GoMicroservicesCourse/shared v0.0.0-20251110084421-a355d9d07704
 	github.com/brianvoe/gofakeit/v7 v7.8.1
 	github.com/caarlos0/env/v11 v11.3.1
@@ -11,6 +14,7 @@ require (
 	github.com/samber/lo v1.52.0
 	github.com/stretchr/testify v1.11.1
 	go.mongodb.org/mongo-driver v1.17.6
+	go.uber.org/zap v1.27.0
 	google.golang.org/grpc v1.76.0
 	google.golang.org/protobuf v1.36.10
 )
@@ -29,6 +33,7 @@ require (
 	github.com/xdg-go/stringprep v1.0.4 // indirect
 	github.com/youmark/pkcs8 v0.0.0-20240726163527-a2c0da244d78 // indirect
 	go.opentelemetry.io/otel/sdk/metric v1.38.0 // indirect
+	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/crypto v0.42.0 // indirect
 	golang.org/x/net v0.44.0 // indirect
 	golang.org/x/sync v0.17.0 // indirect
