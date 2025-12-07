@@ -18,10 +18,10 @@ import (
 	paymentClientV1 "github.com/Mahno9/GoMicroservicesCourse/order/internal/client/grpc/payment/v1"
 	"github.com/Mahno9/GoMicroservicesCourse/order/internal/config"
 	repository "github.com/Mahno9/GoMicroservicesCourse/order/internal/repository"
-	"github.com/Mahno9/GoMicroservicesCourse/order/internal/repository/migrator"
 	orderRepo "github.com/Mahno9/GoMicroservicesCourse/order/internal/repository/order"
 	orderModel "github.com/Mahno9/GoMicroservicesCourse/order/internal/service/order"
 	"github.com/Mahno9/GoMicroservicesCourse/platform/pkg/closer"
+	"github.com/Mahno9/GoMicroservicesCourse/platform/pkg/migrator"
 	genOrderV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/openapi/order/v1"
 	genInventoryV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/proto/inventory/v1"
 	genPaymentV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/proto/payment/v1"
@@ -137,7 +137,7 @@ func (c *diContainer) Repository(ctx context.Context) repository.OrderRepository
 }
 
 func migratePGDatabase(dbConnPool *pgxpool.Pool, c *diContainer) {
-	migratorRunner := migrator.NewMigrator(stdlib.OpenDB(*dbConnPool.Config().Copy().ConnConfig), c.config.PostgresConfig.MigrationsDir())
+	migratorRunner := migrator.New(stdlib.OpenDB(*dbConnPool.Config().Copy().ConnConfig), c.config.PostgresConfig.MigrationsDir())
 	err := migratorRunner.Up()
 	if err != nil {
 		panic(fmt.Sprintf("❗ failed to run migrations: %v\n", err.Error()))

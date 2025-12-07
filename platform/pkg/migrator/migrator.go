@@ -3,7 +3,7 @@ package migrator
 import (
 	"database/sql"
 
-	goose "github.com/pressly/goose/v3"
+	"github.com/pressly/goose/v3"
 )
 
 type Migrator struct {
@@ -11,7 +11,7 @@ type Migrator struct {
 	migrationsDir string
 }
 
-func NewMigrator(db *sql.DB, migrationsDir string) *Migrator {
+func New(db *sql.DB, migrationsDir string) *Migrator {
 	return &Migrator{
 		db:            db,
 		migrationsDir: migrationsDir,
