@@ -16,7 +16,7 @@ func (s *service) handleShipAssembled(ctx context.Context, msg kafkaConsumerWrap
 		return err
 	}
 
-	logger.Info(ctx, "Ship assembled event received", zap.String("order_uuid", event.OrderUuid))
+	logger.Info(ctx, "ShipAssembled event received", zap.String("order_uuid", event.OrderUuid))
 	// TODO: send message to Telegram
 
 	return nil

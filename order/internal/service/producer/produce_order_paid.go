@@ -8,21 +8,9 @@ import (
 	"google.golang.org/protobuf/proto"
 
 	"github.com/Mahno9/GoMicroservicesCourse/order/internal/model"
-	services "github.com/Mahno9/GoMicroservicesCourse/order/internal/service"
-	kafkaWrapped "github.com/Mahno9/GoMicroservicesCourse/platform/pkg/kafka"
 	"github.com/Mahno9/GoMicroservicesCourse/platform/pkg/logger"
 	eventsV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/proto/events/v1"
 )
-
-type service struct {
-	orderPaidProducer kafkaWrapped.Producer
-}
-
-func NewService(orderPaidProducer kafkaWrapped.Producer) services.ProducerService {
-	return &service{
-		orderPaidProducer: orderPaidProducer,
-	}
-}
 
 func (s *service) ProduceOrderPaid(ctx context.Context, event model.OrderPaidEvent) error {
 	msg := &eventsV1.OrderPaid{
