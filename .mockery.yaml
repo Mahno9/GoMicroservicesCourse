@@ -14,3 +14,6 @@ packages:
   github.com/Mahno9/GoMicroservicesCourse/order/internal:
     config:
       include-regex: ".*(Repository|Client|ProducerService)"
+  github.com/Mahno9/GoMicroservicesCourse/assembly/internal:
+    config:
+      include-regex: ".*(Service)"
