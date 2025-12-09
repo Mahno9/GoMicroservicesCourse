@@ -8,5 +8,5 @@ type TelegramClient interface {
 }
 
 type NewChatSubscriber interface {
-	NewChatStarted(ctx context.Context, chatId int64)
+	NewChatStarted(ctx context.Context, chatId int64) error
 }

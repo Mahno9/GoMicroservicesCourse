@@ -3,11 +3,12 @@ package order_paid
 import (
 	"context"
 
+	"go.uber.org/zap"
+
 	"github.com/Mahno9/GoMicroservicesCourse/notification/internal/converter/kafka"
 	services "github.com/Mahno9/GoMicroservicesCourse/notification/internal/service"
 	kafkaWrapped "github.com/Mahno9/GoMicroservicesCourse/platform/pkg/kafka"
 	"github.com/Mahno9/GoMicroservicesCourse/platform/pkg/logger"
-	"go.uber.org/zap"
 )
 
 type service struct {

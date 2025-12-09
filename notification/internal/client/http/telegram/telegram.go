@@ -3,12 +3,12 @@ package telegram
 import (
 	"context"
 
+	"github.com/go-telegram/bot"
+	"github.com/go-telegram/bot/models"
 	"go.uber.org/zap"
 
 	clients "github.com/Mahno9/GoMicroservicesCourse/notification/internal/client/http"
 	"github.com/Mahno9/GoMicroservicesCourse/platform/pkg/logger"
-	"github.com/go-telegram/bot"
-	"github.com/go-telegram/bot/models"
 )
 
 type client struct {
@@ -30,7 +30,9 @@ func (c *client) startHandler(ctx context.Context, bot *bot.Bot, update *models.
 	logger.Info(ctx, "New chat started", zap.Int64("chatId", update.Message.Chat.ID))
 
 	for _, sub := range c.newChatSubs {
-		sub.NewChatStarted(ctx, update.Message.Chat.ID)
+		if err := sub.NewChatStarted(ctx, update.Message.Chat.ID); err != nil {
+			logger.Error(ctx, "😡 Failed to register new chat", zap.Error(err))
+		}
 	}
 }
 

@@ -1,9 +1,10 @@
 package decoder
 
 import (
+	"google.golang.org/protobuf/proto"
+
 	"github.com/Mahno9/GoMicroservicesCourse/notification/model"
 	eventsV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/proto/events/v1"
-	"google.golang.org/protobuf/proto"
 )
 
 type ShipAssembledDecoder struct{}

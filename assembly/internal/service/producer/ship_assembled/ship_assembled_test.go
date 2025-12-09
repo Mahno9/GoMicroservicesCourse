@@ -28,7 +28,7 @@ type kafkaProducerMock struct {
 	mock.Mock
 }
 
-func (m *kafkaProducerMock) Send(ctx context.Context, key []byte, value []byte) error {
+func (m *kafkaProducerMock) Send(ctx context.Context, key, value []byte) error {
 	args := m.Called(ctx, key, value)
 	return args.Error(0)
 }

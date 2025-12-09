@@ -3,10 +3,11 @@ package telegramservice
 import (
 	"context"
 
+	"go.uber.org/zap"
+
 	clients "github.com/Mahno9/GoMicroservicesCourse/notification/internal/client/http"
 	services "github.com/Mahno9/GoMicroservicesCourse/notification/internal/service"
 	"github.com/Mahno9/GoMicroservicesCourse/platform/pkg/logger"
-	"go.uber.org/zap"
 )
 
 type service struct {
@@ -36,9 +37,9 @@ func (s *service) BroadcastMessage(ctx context.Context, message string) error {
 	return nil
 }
 
-func (s *service) NewChatStarted(ctx context.Context, chatId int64) {
+func (s *service) NewChatStarted(ctx context.Context, chatId int64) error {
 	s.savedChatIds = append(s.savedChatIds, chatId)
 	logger.Info(ctx, "📝 New chat registered", zap.Int64("ChatId", chatId))
 
-	s.telegramClient.SendMessage(ctx, chatId, "User registered.")
+	return s.telegramClient.SendMessage(ctx, chatId, "User registered.")
 }
