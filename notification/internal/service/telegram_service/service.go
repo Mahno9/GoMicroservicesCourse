@@ -5,11 +5,18 @@ import (
 	"context"
 	"text/template"
 
+	"go.uber.org/zap"
+
 	clients "github.com/Mahno9/GoMicroservicesCourse/notification/internal/client/http"
 	"github.com/Mahno9/GoMicroservicesCourse/notification/internal/config"
 	services "github.com/Mahno9/GoMicroservicesCourse/notification/internal/service"
 	templates "github.com/Mahno9/GoMicroservicesCourse/notification/internal/service/telegram_service/templates"
 	"github.com/Mahno9/GoMicroservicesCourse/notification/model"
+	"github.com/Mahno9/GoMicroservicesCourse/platform/pkg/logger"
+)
+
+const (
+	HelloMessage = "👋 Hi, I'm notification bot."
 )
 
 var (
@@ -22,13 +29,23 @@ type service struct {
 	chatID         int64
 }
 
-func NewService(telegramClient clients.TelegramClient, cfg config.TelegramConfig) services.TelegramService {
+func NewService(ctx context.Context, telegramClient clients.TelegramClient, cfg config.TelegramConfig) services.TelegramService {
 	s := &service{
 		telegramClient: telegramClient,
 		chatID:         cfg.ChatID(),
 	}
 
+	err := s.telegramClient.SetStartHandler(ctx, s.startHandler)
+	if err != nil {
+		logger.Warn(ctx, "failed to set start handler", zap.Error(err))
+	}
+
 	return s
+}
+
+func (s *service) startHandler(ctx context.Context) error {
+	err := s.telegramClient.SendMessage(ctx, s.chatID, HelloMessage)
+	return err
 }
 
 func (s *service) SendShipAssembledMessage(ctx context.Context, event model.ShipAssembledEvent) error {

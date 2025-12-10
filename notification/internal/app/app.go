@@ -28,10 +28,6 @@ func New(ctx context.Context, cfg *config.Config) (*app, error) {
 
 func (a *app) Run(ctx context.Context) error {
 	result := make(chan error, 3)
-	closer.AddNamed("Closing result channel", func(ctx context.Context) error {
-		close(result)
-		return nil
-	})
 
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -75,7 +71,7 @@ func (a *app) initDeps(ctx context.Context, cfg *config.Config) error {
 		a.initDI,
 		a.initLogger,
 		a.initCloser,
-		a.initBot,
+		a.initTelegramService,
 	}
 
 	for _, init := range inits {
@@ -102,8 +98,8 @@ func (a *app) initCloser(ctx context.Context, cfg *config.Config) error {
 	return nil
 }
 
-func (a *app) initBot(ctx context.Context, cfg *config.Config) error {
-	a.diContainer.TelegramBot() // call before run
+func (a *app) initTelegramService(ctx context.Context, cfg *config.Config) error {
+	a.diContainer.TelegramService(ctx)
 	return nil
 }
 

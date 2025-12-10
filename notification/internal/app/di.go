@@ -3,6 +3,8 @@ package app
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"time"
 
 	"github.com/IBM/sarama"
 	"github.com/go-telegram/bot"
@@ -48,7 +50,7 @@ func (c *diContainer) OrderPaidConsumerService(ctx context.Context) services.Ord
 		c.orderPaidConsumerService = orderPaidConsumerService.NewService(
 			c.OrderPaidConsumer(ctx),
 			c.OrderPaidDecoder(),
-			c.TelegramService(),
+			c.TelegramService(ctx),
 		)
 	}
 	return c.orderPaidConsumerService
@@ -100,8 +102,15 @@ func (c *diContainer) TelegramClient() clients.TelegramClient {
 
 func (c *diContainer) TelegramBot() *bot.Bot {
 	if c.telegramBot == nil {
+		opts := []bot.Option{
+			bot.WithHTTPClient(10*time.Second, &http.Client{
+				Timeout: 10 * time.Second,
+			}),
+			bot.WithSkipGetMe(),
+		}
+
 		var err error
-		c.telegramBot, err = bot.New(c.config.Telegram.BotToken(), bot.WithDebug())
+		c.telegramBot, err = bot.New(c.config.Telegram.BotToken(), opts...)
 		if err != nil {
 			panic(fmt.Errorf("❗ failed to create bot: %w", err))
 		}
@@ -110,9 +119,9 @@ func (c *diContainer) TelegramBot() *bot.Bot {
 	return c.telegramBot
 }
 
-func (c *diContainer) TelegramService() services.TelegramService {
+func (c *diContainer) TelegramService(ctx context.Context) services.TelegramService {
 	if c.telegramService == nil {
-		c.telegramService = telegramService.NewService(c.TelegramClient(), c.config.Telegram)
+		c.telegramService = telegramService.NewService(ctx, c.TelegramClient(), c.config.Telegram)
 	}
 	return c.telegramService
 }
@@ -122,7 +131,7 @@ func (c *diContainer) ShipAssembledConsumerService(ctx context.Context) services
 		c.shipAssembledConsumerService = shipAssembledConsumerService.NewService(
 			c.ShipAssembledConsumer(ctx),
 			c.ShipAssembledDecoder(),
-			c.TelegramService(),
+			c.TelegramService(ctx),
 		)
 	}
 
