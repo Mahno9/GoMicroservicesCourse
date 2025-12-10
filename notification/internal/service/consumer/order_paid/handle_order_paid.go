@@ -25,9 +25,7 @@ func (s *service) handleOrderPaidMessage(ctx context.Context, message consumer.M
 func (s *service) handleOrderPaid(ctx context.Context, event model.OrderPaidEvent) error {
 	logger.Info(ctx, "Handling OrderPaid event", zap.Any("event", event))
 
-	message := s.formatOrderPaidMessage(event)
-
-	err := s.telegramService.BroadcastMessage(ctx, message)
+	err := s.telegramService.SendOrderPaidMessage(ctx, event)
 	if err != nil {
 		logger.Error(ctx, "Failed to send telegram notification", zap.Error(err))
 		return model.ErrFailedToSendNotification
@@ -38,12 +36,4 @@ func (s *service) handleOrderPaid(ctx context.Context, event model.OrderPaidEven
 		zap.String("userID", event.UserID))
 
 	return nil
-}
-
-func (s *service) formatOrderPaidMessage(event model.OrderPaidEvent) string {
-	return "🎉 Order Paid!\n\n" +
-		"Order ID: " + event.OrderID + "\n" +
-		"Payment Method: " + event.PaymentMethod + "\n" +
-		"Transaction ID: " + event.TransactionUUID + "\n" +
-		"Thank you for your payment!"
 }

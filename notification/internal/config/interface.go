@@ -25,4 +25,5 @@ type ShipAssembledConsumerConfig interface {
 
 type TelegramConfig interface {
 	BotToken() string
+	ChatID() int64
 }

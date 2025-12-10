@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+
+	"github.com/Mahno9/GoMicroservicesCourse/notification/model"
 )
 
 type OrderPaidConsumerService interface {
@@ -13,5 +15,6 @@ type ShipAssembledConsumerService interface {
 }
 
 type TelegramService interface {
-	BroadcastMessage(ctx context.Context, message string) error
+	SendShipAssembledMessage(ctx context.Context, event model.ShipAssembledEvent) error
+	SendOrderPaidMessage(ctx context.Context, event model.OrderPaidEvent) error
 }

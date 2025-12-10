@@ -112,7 +112,7 @@ func (c *diContainer) TelegramBot() *bot.Bot {
 
 func (c *diContainer) TelegramService() services.TelegramService {
 	if c.telegramService == nil {
-		c.telegramService = telegramService.NewService(c.TelegramClient())
+		c.telegramService = telegramService.NewService(c.TelegramClient(), c.config.Telegram)
 	}
 	return c.telegramService
 }

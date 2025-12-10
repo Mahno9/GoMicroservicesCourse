@@ -12,8 +12,7 @@ import (
 )
 
 type client struct {
-	bot         *bot.Bot
-	newChatSubs []clients.NewChatSubscriber
+	bot *bot.Bot
 }
 
 func NewClient(tBot *bot.Bot) clients.TelegramClient {
@@ -28,12 +27,6 @@ func NewClient(tBot *bot.Bot) clients.TelegramClient {
 
 func (c *client) startHandler(ctx context.Context, bot *bot.Bot, update *models.Update) {
 	logger.Info(ctx, "New chat started", zap.Int64("chatId", update.Message.Chat.ID))
-
-	for _, sub := range c.newChatSubs {
-		if err := sub.NewChatStarted(ctx, update.Message.Chat.ID); err != nil {
-			logger.Error(ctx, "😡 Failed to register new chat", zap.Error(err))
-		}
-	}
 }
 
 func (c *client) SendMessage(ctx context.Context, chatId int64, message string) error {
@@ -48,8 +41,4 @@ func (c *client) SendMessage(ctx context.Context, chatId int64, message string) 
 	})
 
 	return err
-}
-
-func (c *client) RegisterNewChatSubscriber(sub clients.NewChatSubscriber) {
-	c.newChatSubs = append(c.newChatSubs, sub)
 }

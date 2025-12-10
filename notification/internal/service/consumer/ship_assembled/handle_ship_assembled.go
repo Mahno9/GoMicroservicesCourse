@@ -25,9 +25,7 @@ func (s *service) handleShipAssembledMessage(ctx context.Context, message consum
 func (s *service) handleShipAssembled(ctx context.Context, event model.ShipAssembledEvent) error {
 	logger.Info(ctx, "Handling ShipAssembled event", zap.Any("event", event))
 
-	message := s.formatShipAssembledMessage(event)
-
-	err := s.telegramService.BroadcastMessage(ctx, message)
+	err := s.telegramService.SendShipAssembledMessage(ctx, event)
 	if err != nil {
 		logger.Error(ctx, "Failed to send telegram notification", zap.Error(err))
 		return model.ErrFailedToSendNotification
@@ -39,11 +37,4 @@ func (s *service) handleShipAssembled(ctx context.Context, event model.ShipAssem
 		zap.String("userID", event.UserID))
 
 	return nil
-}
-
-func (s *service) formatShipAssembledMessage(event model.ShipAssembledEvent) string {
-	return "📦 Ship Assembled!\n\n" +
-		"Order ID: " + event.OrderID + "\n" +
-		"Tracking ID: " + event.TrackingID + "\n" +
-		"Your order is ready for shipping!"
 }
