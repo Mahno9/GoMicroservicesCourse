@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/IBM/sarama"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -17,10 +18,19 @@ import (
 	inventoryClientV1 "github.com/Mahno9/GoMicroservicesCourse/order/internal/client/grpc/inventory/v1"
 	paymentClientV1 "github.com/Mahno9/GoMicroservicesCourse/order/internal/client/grpc/payment/v1"
 	"github.com/Mahno9/GoMicroservicesCourse/order/internal/config"
+	kafkaConverter "github.com/Mahno9/GoMicroservicesCourse/order/internal/converter/kafka"
+	kafkaConverterDecoder "github.com/Mahno9/GoMicroservicesCourse/order/internal/converter/kafka/decoder"
 	repository "github.com/Mahno9/GoMicroservicesCourse/order/internal/repository"
 	orderRepo "github.com/Mahno9/GoMicroservicesCourse/order/internal/repository/order"
-	orderModel "github.com/Mahno9/GoMicroservicesCourse/order/internal/service/order"
+	services "github.com/Mahno9/GoMicroservicesCourse/order/internal/service"
+	consumerService "github.com/Mahno9/GoMicroservicesCourse/order/internal/service/consumer"
+	orderService "github.com/Mahno9/GoMicroservicesCourse/order/internal/service/order"
+	producerService "github.com/Mahno9/GoMicroservicesCourse/order/internal/service/producer"
 	"github.com/Mahno9/GoMicroservicesCourse/platform/pkg/closer"
+	wrappedKafka "github.com/Mahno9/GoMicroservicesCourse/platform/pkg/kafka"
+	wrappedKafkaConsumer "github.com/Mahno9/GoMicroservicesCourse/platform/pkg/kafka/consumer"
+	wrappedKafkaProducer "github.com/Mahno9/GoMicroservicesCourse/platform/pkg/kafka/producer"
+	"github.com/Mahno9/GoMicroservicesCourse/platform/pkg/logger"
 	"github.com/Mahno9/GoMicroservicesCourse/platform/pkg/migrator"
 	genOrderV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/openapi/order/v1"
 	genInventoryV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/proto/inventory/v1"
@@ -30,25 +40,36 @@ import (
 type diContainer struct {
 	config *config.Config
 
+	orderService    services.OrderService
+	producerService services.ProducerService
+	consumerService services.ConsumerService
+
 	orderV1API *genOrderV1.Server
-	inventory  clients.InventoryClient
-	payment    clients.PaymentClient
+
+	inventory clients.InventoryClient
+	payment   clients.PaymentClient
+
 	repository repository.OrderRepository
 	router     *chi.Mux
+
+	syncProducer      sarama.SyncProducer
+	orderPaidProducer wrappedKafka.Producer
+
+	consumerGroup         sarama.ConsumerGroup
+	shipAssembledConsumer wrappedKafka.Consumer
+	shipAssembledDecoder  kafkaConverter.ShipAssembledDecoder
 }
 
 func NewDIContainer(cfg *config.Config) *diContainer {
 	return &diContainer{config: cfg}
 }
 
-func (c *diContainer) OrderHTTPServer(ctx context.Context) *genOrderV1.Server {
+func (c *diContainer) OrderV1API(ctx context.Context) *genOrderV1.Server {
 	if c.orderV1API != nil {
 		return c.orderV1API
 	}
 
-	orderService := orderModel.NewService(c.Inventory(), c.Payment(), c.Repository(ctx))
-
-	apiHandler := orderApiHandlerV1.NewAPIHandler(orderService)
+	apiHandler := orderApiHandlerV1.NewAPIHandler(c.OrderService(ctx))
 
 	var err error
 	c.orderV1API, err = genOrderV1.NewServer(apiHandler)
@@ -59,12 +80,36 @@ func (c *diContainer) OrderHTTPServer(ctx context.Context) *genOrderV1.Server {
 	return c.orderV1API
 }
 
+func (c *diContainer) OrderService(ctx context.Context) services.OrderService {
+	if c.orderService == nil {
+		c.orderService = orderService.NewService(c.Inventory(), c.Payment(), c.Repository(ctx), c.ProducerService(ctx))
+	}
+
+	return c.orderService
+}
+
+func (c *diContainer) ProducerService(ctx context.Context) services.ProducerService {
+	if c.producerService == nil {
+		c.producerService = producerService.NewService(c.OrderPaidProducer(ctx))
+	}
+
+	return c.producerService
+}
+
+func (c *diContainer) ConsumerService(ctx context.Context) services.ConsumerService {
+	if c.consumerService == nil {
+		c.consumerService = consumerService.NewService(c.ShipAssembledConsumer(ctx), c.ShipAssembledDecoder())
+	}
+
+	return c.consumerService
+}
+
 func (c *diContainer) Inventory() clients.InventoryClient {
 	if c.inventory != nil {
 		return c.inventory
 	}
 
-	inventoryConn, err := grpc.NewClient(c.config.ClientsConfig.InventoryAddress(),
+	inventoryConn, err := grpc.NewClient(c.config.Clients.InventoryAddress(),
 		grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		panic(fmt.Sprintf("❗ failed to create inventory connection: %v\n", err.Error()))
@@ -89,7 +134,7 @@ func (c *diContainer) Payment() clients.PaymentClient {
 		return c.payment
 	}
 
-	paymentConn, err := grpc.NewClient(c.config.ClientsConfig.PaymentAddress(),
+	paymentConn, err := grpc.NewClient(c.config.Clients.PaymentAddress(),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
@@ -114,7 +159,7 @@ func (c *diContainer) Repository(ctx context.Context) repository.OrderRepository
 		return c.repository
 	}
 
-	dbConnPool, err := pgxpool.New(ctx, c.config.PostgresConfig.URI())
+	dbConnPool, err := pgxpool.New(ctx, c.config.Postgres.URI())
 	if err != nil {
 		panic(fmt.Sprintf("❗ failed to create database connection pool: %v\n", err.Error()))
 	}
@@ -137,7 +182,7 @@ func (c *diContainer) Repository(ctx context.Context) repository.OrderRepository
 }
 
 func migratePGDatabase(dbConnPool *pgxpool.Pool, c *diContainer) {
-	migratorRunner := migrator.New(stdlib.OpenDB(*dbConnPool.Config().Copy().ConnConfig), c.config.PostgresConfig.MigrationsDir())
+	migratorRunner := migrator.New(stdlib.OpenDB(*dbConnPool.Config().Copy().ConnConfig), c.config.Postgres.MigrationsDir())
 	err := migratorRunner.Up()
 	if err != nil {
 		panic(fmt.Sprintf("❗ failed to run migrations: %v\n", err.Error()))
@@ -154,7 +199,82 @@ func (c *diContainer) Router(ctx context.Context) *chi.Mux {
 	c.router.Use(middleware.Logger)
 	c.router.Use(middleware.Recoverer)
 	c.router.Use(middleware.Timeout(10 * time.Second))
-	c.router.Mount("/", c.OrderHTTPServer(ctx))
+	c.router.Mount("/", c.OrderV1API(ctx))
 
 	return c.router
+}
+
+func (c *diContainer) SyncProducer() sarama.SyncProducer {
+	if c.syncProducer != nil {
+		return c.syncProducer
+	}
+
+	var err error
+	c.syncProducer, err = sarama.NewSyncProducer(
+		c.config.Kafka.BrokersAddresses(),
+		c.config.OrderPaidProducer.Config(),
+	)
+	if err != nil {
+		panic(fmt.Sprintf("❗ failed to create sync producer: %v\n", err.Error()))
+	}
+
+	closer.AddNamed("Sync producer", func(ctx context.Context) error {
+		return c.syncProducer.Close()
+	})
+
+	return c.syncProducer
+}
+
+func (c *diContainer) OrderPaidProducer(ctx context.Context) wrappedKafka.Producer {
+	if c.orderPaidProducer != nil {
+		return c.orderPaidProducer
+	}
+
+	c.orderPaidProducer = wrappedKafkaProducer.NewProducer(
+		c.SyncProducer(),
+		c.config.OrderPaidProducer.TopicName(),
+		logger.Logger(),
+	)
+
+	return c.orderPaidProducer
+}
+
+func (c *diContainer) ShipAssembledConsumer(ctx context.Context) wrappedKafka.Consumer {
+	if c.shipAssembledConsumer != nil {
+		return c.shipAssembledConsumer
+	}
+
+	c.shipAssembledConsumer = wrappedKafkaConsumer.NewConsumer(
+		c.ConsumerGroup(ctx),
+		[]string{c.config.ShipAssembledConsumer.TopicName()},
+		logger.Logger(),
+	)
+
+	return c.shipAssembledConsumer
+}
+
+func (c *diContainer) ConsumerGroup(ctx context.Context) sarama.ConsumerGroup {
+	if c.consumerGroup != nil {
+		return c.consumerGroup
+	}
+
+	var err error
+	c.consumerGroup, err = sarama.NewConsumerGroup(
+		c.config.Kafka.BrokersAddresses(),
+		c.config.ShipAssembledConsumer.ConsumerGroupID(),
+		c.config.ShipAssembledConsumer.Config(),
+	)
+	if err != nil {
+		panic(fmt.Sprintf("❗ failed to create consumer group: %v", err))
+	}
+
+	return c.consumerGroup
+}
+
+func (c *diContainer) ShipAssembledDecoder() kafkaConverter.ShipAssembledDecoder {
+	if c.shipAssembledDecoder == nil {
+		c.shipAssembledDecoder = kafkaConverterDecoder.NewShipAssembledDecoder()
+	}
+
+	return c.shipAssembledDecoder
 }

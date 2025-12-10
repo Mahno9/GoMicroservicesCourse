@@ -70,7 +70,7 @@ func (a *App) initCloser(ctx context.Context, cfg *config.Config) error {
 }
 
 func (a *App) initListener(ctx context.Context, cfg *config.Config) error {
-	listener, err := net.Listen("tcp", fmt.Sprintf(":%s", cfg.GrpcConfig.Port()))
+	listener, err := net.Listen("tcp", fmt.Sprintf("%s:%s", cfg.GrpcConfig.Host(), cfg.GrpcConfig.Port()))
 	if err != nil {
 		return err
 	}

@@ -8,6 +8,8 @@ import (
 
 	clientMocks "github.com/Mahno9/GoMicroservicesCourse/order/internal/client/grpc/mocks"
 	repoMocks "github.com/Mahno9/GoMicroservicesCourse/order/internal/repository/mocks"
+	services "github.com/Mahno9/GoMicroservicesCourse/order/internal/service"
+	serviceMocks "github.com/Mahno9/GoMicroservicesCourse/order/internal/service/mocks"
 )
 
 type ServiceSuite struct {
@@ -20,7 +22,9 @@ type ServiceSuite struct {
 
 	repository *repoMocks.OrderRepository
 
-	service *service
+	producerService *serviceMocks.ProducerService
+
+	service services.OrderService
 }
 
 func (s *ServiceSuite) SetupSuite() {
@@ -29,8 +33,9 @@ func (s *ServiceSuite) SetupSuite() {
 	s.inventory = clientMocks.NewInventoryClient(s.T())
 	s.payment = clientMocks.NewPaymentClient(s.T())
 	s.repository = repoMocks.NewOrderRepository(s.T())
+	s.producerService = serviceMocks.NewProducerService(s.T())
 
-	s.service = NewService(s.inventory, s.payment, s.repository)
+	s.service = NewService(s.inventory, s.payment, s.repository, s.producerService)
 }
 
 func (s *ServiceSuite) SetupTest() {
@@ -40,6 +45,8 @@ func (s *ServiceSuite) SetupTest() {
 	s.inventory.Calls = nil
 	s.payment.ExpectedCalls = nil
 	s.payment.Calls = nil
+	s.producerService.ExpectedCalls = nil
+	s.producerService.Calls = nil
 }
 
 func TestServiceIntegration(t *testing.T) {

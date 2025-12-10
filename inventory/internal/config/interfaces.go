@@ -11,5 +11,6 @@ type MongoConfig interface {
 }
 
 type GrpcConfig interface {
+	Host() string
 	Port() string
 }

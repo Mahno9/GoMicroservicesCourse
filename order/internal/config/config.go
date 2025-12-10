@@ -7,10 +7,17 @@ import (
 )
 
 type Config struct {
-	LoggerConfig   LoggerConfig
-	PostgresConfig PostgresConfig
-	HttpConfig     HttpConfig
-	ClientsConfig  ClientsConfig
+	Logger LoggerConfig
+
+	Postgres PostgresConfig
+
+	Http HttpConfig
+
+	Clients ClientsConfig
+
+	Kafka                 KafkaConfig
+	OrderPaidProducer     OrderPaidProducerConfig
+	ShipAssembledConsumer ShipAssembledConsumerConfig
 }
 
 func Load(path ...string) (*Config, error) {
@@ -39,10 +46,28 @@ func Load(path ...string) (*Config, error) {
 		return nil, err
 	}
 
+	kafkaConfig, err := env.NewKafkaConfig()
+	if err != nil {
+		return nil, err
+	}
+
+	orderPaidProducer, err := env.NewOrderPaidProducerConfig()
+	if err != nil {
+		return nil, err
+	}
+
+	shipAssembledConsumer, err := env.NewShipAssembledConsumerConfig()
+	if err != nil {
+		return nil, err
+	}
+
 	return &Config{
-		LoggerConfig:   loggerConfig,
-		PostgresConfig: postgresConfig,
-		HttpConfig:     httpConfig,
-		ClientsConfig:  clientsConfig,
+		Logger:                loggerConfig,
+		Postgres:              postgresConfig,
+		Http:                  httpConfig,
+		Clients:               clientsConfig,
+		Kafka:                 kafkaConfig,
+		OrderPaidProducer:     orderPaidProducer,
+		ShipAssembledConsumer: shipAssembledConsumer,
 	}, nil
 }
