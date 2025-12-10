@@ -3,122 +3,52 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
-	"net"
-	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
-	"github.com/joho/godotenv"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
+	"go.uber.org/zap"
 
-	partV1API "github.com/Mahno9/GoMicroservicesCourse/inventory/internal/api/inventory/v1"
-	"github.com/Mahno9/GoMicroservicesCourse/inventory/internal/repository"
-	partRepository "github.com/Mahno9/GoMicroservicesCourse/inventory/internal/repository/part"
-	partService "github.com/Mahno9/GoMicroservicesCourse/inventory/internal/service/part"
-	genInventoryV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/proto/inventory/v1"
+	"github.com/Mahno9/GoMicroservicesCourse/inventory/internal/app"
+	"github.com/Mahno9/GoMicroservicesCourse/inventory/internal/config"
+	"github.com/Mahno9/GoMicroservicesCourse/platform/pkg/closer"
+	"github.com/Mahno9/GoMicroservicesCourse/platform/pkg/logger"
 )
 
 const (
-	initPartsTimeout = 5 * time.Second
+	gracefulShutdownTimeout = 5 * time.Second
 
-	envPathDefault      = ".env"
-	envPathEnvName      = "ENV_PATH"
-	grpcPortEnvName     = "INVENTORY_SERVICE_PORT"
-	databaseUriEnvName  = "INVENTORY_DB_URI"
-	databaseNameEnvName = "INVENTORY_DB_NAME"
+	configPath = "deploy/compose/inventory/.env"
 )
 
 func main() {
-	ctx := context.Background()
-
-	// Load .env variables
-	envPath := os.Getenv(envPathEnvName)
-	if envPath == "" {
-		envPath = envPathDefault
-	}
-	err := godotenv.Load(envPath)
+	cfg, err := config.Load(configPath)
 	if err != nil {
-		log.Printf("❗ Failed to load env file: %v\n", err)
-		return
+		panic(fmt.Errorf("❗ Failed to load env file: %w", err))
 	}
 
-	// Inventory Repository
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(os.Getenv(databaseUriEnvName)))
+	appCtx, appCancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer appCancel()
+	defer gracefulShutdown()
+
+	closer.Configure(syscall.SIGINT, syscall.SIGTERM)
+
+	a, err := app.New(appCtx, cfg)
 	if err != nil {
-		log.Printf("❗ failed to connect to database: %v\n", err)
-		return
-	}
-	defer func() {
-		if cerr := client.Disconnect(ctx); cerr != nil {
-			log.Printf("❗ failed to disconnect from database: %v\n", cerr)
-		}
-	}()
-
-	if err = client.Ping(ctx, nil); err != nil {
-		log.Printf("❗ failed to ping database: %v\n", err)
-		return
+		panic(fmt.Errorf("❗ Failed to create app: %w", err))
 	}
 
-	inventoryDb := client.Database(os.Getenv(databaseNameEnvName))
-	wrappedDb := &repository.MongoDatabaseAdapter{Database: inventoryDb}
-	partRepo, err := partRepository.NewRepository(ctx, wrappedDb)
+	err = a.Run(appCtx)
 	if err != nil {
-		log.Printf("❗ failed to create repository: %v\n", err)
-		return
+		panic(fmt.Errorf("❗ Failed to run app: %w", err))
 	}
+}
 
-	// Inventory Service
-	service := partService.NewService(partRepo)
-
-	timedContext, cancel := context.WithTimeout(ctx, initPartsTimeout)
+func gracefulShutdown() {
+	ctx, cancel := context.WithTimeout(context.Background(), gracefulShutdownTimeout)
 	defer cancel()
 
-	err = service.InitWithDummy(timedContext) // init with dummy data
-	if err != nil {
-		log.Printf("❗ failed to init with dummy data: %v\n", err)
-		return
+	if err := closer.CloseAll(ctx); err != nil {
+		logger.Error(ctx, "❗ failed to close all: %v", zap.Error(err))
 	}
-
-	// Inventory API
-	serviceAPI := partV1API.NewAPI(service)
-
-	// gRPC service serving
-	grpcServer := grpc.NewServer()
-	genInventoryV1.RegisterInventoryServiceServer(grpcServer, serviceAPI)
-
-	reflection.Register(grpcServer)
-
-	listener, err := net.Listen("tcp", fmt.Sprintf(":%s", os.Getenv(grpcPortEnvName)))
-	if err != nil {
-		log.Printf("❗ failed to listen: %v\n", err)
-		return
-	}
-	defer func() {
-		if err := listener.Close(); err != nil {
-			log.Printf("❗ failed to close listener: %v\n", err)
-		}
-	}()
-
-	go func() {
-		log.Printf("👂 gRPC server listening on port %s\n", os.Getenv(grpcPortEnvName))
-		err = grpcServer.Serve(listener)
-		if err != nil {
-			log.Printf("❗ failed to serve: %v\n", err)
-			return
-		}
-	}()
-
-	// Gracefull shutdown
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	<-quit
-
-	log.Println("🟧 Shutting down gRPC server...")
-	grpcServer.GracefulStop()
-	log.Println("✅ gRPC server gracefully stopped")
 }

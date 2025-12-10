@@ -3,13 +3,14 @@ package part
 import (
 	"context"
 	"errors"
-	"log"
 
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.uber.org/zap"
 
 	"github.com/Mahno9/GoMicroservicesCourse/inventory/internal/model"
 	"github.com/Mahno9/GoMicroservicesCourse/inventory/internal/repository/converter"
 	remoModel "github.com/Mahno9/GoMicroservicesCourse/inventory/internal/repository/model"
+	"github.com/Mahno9/GoMicroservicesCourse/platform/pkg/logger"
 )
 
 func (r *repository) ListParts(ctx context.Context, filters *model.PartsFilter) ([]*model.Part, error) {
@@ -25,7 +26,7 @@ func (r *repository) ListParts(ctx context.Context, filters *model.PartsFilter) 
 	defer func() {
 		cerr := cursor.Close(ctx)
 		if cerr != nil {
-			log.Printf("❗ failed to close cursor: %v\n", cerr)
+			logger.Error(ctx, "❗ failed to close cursor: %v", zap.Error(cerr))
 		}
 	}()
 

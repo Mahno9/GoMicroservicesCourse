@@ -2,7 +2,7 @@ package part
 
 import (
 	"context"
-	"log"
+	"fmt"
 	"math"
 	"time"
 
@@ -10,6 +10,7 @@ import (
 	"github.com/google/uuid"
 
 	repoModel "github.com/Mahno9/GoMicroservicesCourse/inventory/internal/repository/model"
+	"github.com/Mahno9/GoMicroservicesCourse/platform/pkg/logger"
 )
 
 func (r *repository) InitWithDummy(ctx context.Context) error {
@@ -25,7 +26,7 @@ func (r *repository) InitWithDummy(ctx context.Context) error {
 		return err
 	}
 
-	log.Printf("📝 Inserted %d parts\n", len(result.InsertedIDs))
+	logger.Info(ctx, fmt.Sprintf("📝 Inserted %d parts\n", len(result.InsertedIDs)))
 
 	return nil
 }

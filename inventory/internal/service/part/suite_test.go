@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	repoMocks "github.com/Mahno9/GoMicroservicesCourse/inventory/internal/repository/mocks"
+	"github.com/Mahno9/GoMicroservicesCourse/platform/pkg/logger"
 )
 
 type ServiceSuite struct {
@@ -21,6 +22,10 @@ type ServiceSuite struct {
 
 func (s *ServiceSuite) SetupSuite() {
 	s.ctx = context.Background()
+
+	if err := logger.Init("test", false); err != nil {
+		s.T().Errorf("Failed to initialize logger: %v", err)
+	}
 
 	s.repository = repoMocks.NewPartRepository(s.T())
 

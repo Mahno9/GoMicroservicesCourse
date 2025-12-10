@@ -1,72 +1,54 @@
 package main
 
 import (
+	"context"
 	"fmt"
-	"log"
-	"net"
-	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
-	"github.com/joho/godotenv"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
+	"go.uber.org/zap"
 
-	paymentV1API "github.com/Mahno9/GoMicroservicesCourse/payment/internal/api/payment/v1"
-	paymentService "github.com/Mahno9/GoMicroservicesCourse/payment/internal/service/payment"
-	genPaymentV1 "github.com/Mahno9/GoMicroservicesCourse/shared/pkg/proto/payment/v1"
+	"github.com/Mahno9/GoMicroservicesCourse/payment/internal/app"
+	"github.com/Mahno9/GoMicroservicesCourse/payment/internal/config"
+	"github.com/Mahno9/GoMicroservicesCourse/platform/pkg/closer"
+	"github.com/Mahno9/GoMicroservicesCourse/platform/pkg/logger"
 )
 
 const (
-	envPathDefault  = ".env"
-	envPathEnvName  = "ENV_PATH"
-	grpcPortEnvName = "PAYMENT_SERVICE_PORT"
+	gracefulShutdownTimeout = 5 * time.Second
+
+	configPath = "deploy/compose/payment/.env"
 )
 
 func main() {
-	// Load .env variables
-	envPath := os.Getenv(envPathEnvName)
-	if envPath == "" {
-		envPath = envPathDefault
-	}
-	err := godotenv.Load(envPath)
+	cfg, err := config.Load(configPath)
 	if err != nil {
-		log.Printf("❗ Failed to load env file: %v\n", err)
-		return
+		panic(fmt.Errorf("❗ Failed to load env file: %w", err))
 	}
 
-	listener, err := net.Listen("tcp", fmt.Sprintf(":%s", os.Getenv(grpcPortEnvName)))
+	appCtx, appCancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer appCancel()
+	defer gracefulShutdown()
+
+	closer.Configure(syscall.SIGINT, syscall.SIGTERM)
+
+	a, err := app.New(appCtx, cfg)
 	if err != nil {
-		log.Printf("❗ failed to listen: %v\n", err)
-		return
+		panic(fmt.Errorf("❗ Failed to create app: %w", err))
 	}
-	defer func() {
-		if err := listener.Close(); err != nil {
-			log.Printf("❗ failed to close listener: %v\n", err)
-		}
-	}()
 
-	grpcServer := grpc.NewServer()
+	err = a.Run(appCtx)
+	if err != nil {
+		panic(fmt.Errorf("❗ Failed to run app: %w", err))
+	}
+}
 
-	paymentService := paymentService.NewService()
-	apiService := paymentV1API.NewAPI(paymentService)
-	genPaymentV1.RegisterPaymentServiceServer(grpcServer, apiService)
+func gracefulShutdown() {
+	ctx, cancel := context.WithTimeout(context.Background(), gracefulShutdownTimeout)
+	defer cancel()
 
-	reflection.Register(grpcServer)
-
-	go func() {
-		log.Printf("👂 gRPC server listening on port %s\n", os.Getenv(grpcPortEnvName))
-		err = grpcServer.Serve(listener)
-		if err != nil {
-			log.Printf("❗ failed to serve: %v\n", err)
-			return
-		}
-	}()
-
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	<-quit
-	log.Println("🟧 Shutting down gRPC server...")
-	grpcServer.GracefulStop()
-	log.Println("✅ gRPC server gracefully stopped")
+	if err := closer.CloseAll(ctx); err != nil {
+		logger.Error(ctx, "❗ failed to close all: %v", zap.Error(err))
+	}
 }

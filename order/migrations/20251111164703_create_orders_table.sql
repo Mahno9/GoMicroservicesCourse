@@ -6,7 +6,7 @@ CREATE TABLE orders (
     total_price float8 NOT NULL,
     transaction_uuid UUID,
     payment_method TEXT,
-    order_status TEXT CHECK
+    order_status TEXT
 );
 
 -- +goose Down
